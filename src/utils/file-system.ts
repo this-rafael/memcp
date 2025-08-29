@@ -448,12 +448,90 @@ export class FileSystemUtils {
   }
 
   /**
+   * Remove accents and convert special characters to ASCII equivalents
+   */
+  static removeAccents(text: string): string {
+    const accentMap: { [key: string]: string } = {
+      // Lowercase vowels
+      à: "a",
+      á: "a",
+      â: "a",
+      ã: "a",
+      ä: "a",
+      å: "a",
+      è: "e",
+      é: "e",
+      ê: "e",
+      ë: "e",
+      ì: "i",
+      í: "i",
+      î: "i",
+      ï: "i",
+      ò: "o",
+      ó: "o",
+      ô: "o",
+      õ: "o",
+      ö: "o",
+      ù: "u",
+      ú: "u",
+      û: "u",
+      ü: "u",
+      ý: "y",
+      ÿ: "y",
+      // Uppercase vowels
+      À: "A",
+      Á: "A",
+      Â: "A",
+      Ã: "A",
+      Ä: "A",
+      Å: "A",
+      È: "E",
+      É: "E",
+      Ê: "E",
+      Ë: "E",
+      Ì: "I",
+      Í: "I",
+      Î: "I",
+      Ï: "I",
+      Ò: "O",
+      Ó: "O",
+      Ô: "O",
+      Õ: "O",
+      Ö: "O",
+      Ù: "U",
+      Ú: "U",
+      Û: "U",
+      Ü: "U",
+      Ý: "Y",
+      // Consonants
+      ç: "c",
+      Ç: "C",
+      ñ: "n",
+      Ñ: "N",
+      // German
+      ß: "ss",
+      // Others
+      æ: "ae",
+      Æ: "AE",
+      œ: "oe",
+      Œ: "OE",
+      ø: "o",
+      Ø: "O",
+    };
+
+    return text.replace(
+      /[àáâãäåèéêëìíîïòóôõöùúûüýÿÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝçÇñÑßæÆœŒøØ]/g,
+      (match) => accentMap[match] || match
+    );
+  }
+
+  /**
    * Generate memory file name from title
    */
   static generateMemoryFileName(title: string): string {
-    const normalized = title
+    const normalized = this.removeAccents(title)
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
+      .replace(/[^a-z0-9\s-]/g, "") // Remove remaining special chars
       .replace(/\s+/g, "-") // Replace spaces with hyphens
       .replace(/-+/g, "-") // Collapse multiple hyphens
       .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
@@ -564,7 +642,7 @@ export class FileSystemUtils {
    * Converts to lowercase, replaces spaces with hyphens, removes invalid characters
    */
   static normalizeContextName(name: string): string {
-    return name
+    return this.removeAccents(name)
       .trim()
       .toLowerCase()
       .replace(/\s+/g, "-") // Replace spaces with hyphens

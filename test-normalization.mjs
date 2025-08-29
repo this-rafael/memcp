@@ -9,6 +9,11 @@ const testCases = [
   { input: 'UPPERCASE-text', expected: 'uppercase-text' },
   { input: 'special--chars--test', expected: 'special-chars-test' },
   { input: '-leading-trailing-', expected: 'leading-trailing' },
+  { input: 'Análise do Módulo', expected: 'analise-do-modulo' },
+  { input: 'Configuração', expected: 'configuracao' },
+  { input: 'Programação', expected: 'programacao' },
+  { input: 'Tração', expected: 'tracao' },
+  { input: 'São Paulo', expected: 'sao-paulo' },
   { input: '', expected: '' },  // Should fail validation
 ];
 
@@ -34,6 +39,24 @@ testCases.forEach(({ input, expected }, index) => {
     console.log(`  Result: ${expected === '' ? '✅ PASS (expected error)' : '❌ FAIL'}`);
     console.log('');
   }
+});
+
+// Test filename generation with accents
+console.log('Testing filename generation with accents...\n');
+
+const filenameTests = [
+  'Análise do Módulo Pairs',
+  'Configuração do Sistema',
+  'Programação Avançada',
+  'São Paulo - Região Metropolitana'
+];
+
+filenameTests.forEach((title, index) => {
+  const filename = FileSystemUtils.generateMemoryFileName(title);
+  console.log(`Filename Test ${index + 1}:`);
+  console.log(`  Title: "${title}"`);
+  console.log(`  Generated: "${filename}"`);
+  console.log('');
 });
 
 // Test the full validation function

@@ -1,3 +1,4 @@
+import * as fs from "fs/promises";
 import * as path from "path";
 import { MemoryCache } from "../cache/memory-cache.js";
 import { SearchIndex } from "../indexing/search-index.js";
@@ -90,10 +91,33 @@ export class MemoryTools {
       const fullPath = path.join(this.memoryPath, relativePath);
       return await FileSystemUtils.readMarkdown(fullPath);
     } catch (error) {
+      const fullPath = path.join(this.memoryPath, relativePath);
+
+      // Try to provide helpful debugging information
+      let debugInfo = "";
+      try {
+        const dirPath = path.dirname(fullPath);
+        const fileName = path.basename(fullPath);
+        const files = await fs.readdir(dirPath);
+        const similarFiles = files.filter((f: string) =>
+          f.includes(fileName.split("-").slice(-2).join("-").replace(".md", ""))
+        );
+
+        if (similarFiles.length > 0) {
+          debugInfo = ` Similar files found: [${similarFiles.join(", ")}]`;
+        } else {
+          debugInfo = ` Directory contains: [${files.slice(0, 5).join(", ")}${
+            files.length > 5 ? "..." : ""
+          }]`;
+        }
+      } catch (listError) {
+        // Ignore listing errors
+      }
+
       throw new Error(
         `Failed to read memory: ${
           error instanceof Error ? error.message : String(error)
-        }`
+        } (Full path: ${fullPath})${debugInfo}`
       );
     }
   }

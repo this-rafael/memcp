@@ -572,6 +572,36 @@ export class MaintenanceTools {
   }
 
   /**
+   * Fix corrupted search index data
+   */
+  async fixSearchIndex(): Promise<{
+    validation: { fixed: number; errors: string[] };
+    reindex?: { indexed: number; errors: string[] };
+  }> {
+    try {
+      // First, try to validate and fix existing data
+      const validation = this.searchIndex.validateAndFixIndex();
+
+      // If there were many errors, do a full reindex
+      const result: any = { validation };
+
+      if (validation.errors.length > 0) {
+        console.log("Found validation errors, performing full reindex...");
+        const reindex = await this.searchIndex.reindexAll();
+        result.reindex = reindex;
+      }
+
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Failed to fix search index: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
    * Close connections
    */
   close(): void {

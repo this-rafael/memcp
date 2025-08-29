@@ -1,3 +1,4 @@
+import * as fs from "fs/promises";
 import * as path from "path";
 import { MemoryCache } from "../cache/memory-cache.js";
 import { SearchIndex } from "../indexing/search-index.js";
@@ -508,6 +509,146 @@ export class NavigationTools {
         }`
       );
     }
+  }
+
+  /**
+   * Get file system tree structure with file types
+   */
+  async getFileSystemTree(): Promise<{
+    name: string;
+    type: string;
+    path: string;
+    size?: number;
+    children?: any[];
+    file_count?: number;
+    total_size?: number;
+  }> {
+    try {
+      const rootPath = this.memoryPath;
+      const tree = await this.buildFileSystemNode(rootPath, rootPath);
+
+      return {
+        ...tree,
+        name: "ia-memory",
+        type: "directory",
+        path: "/",
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to get file system tree: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
+   * Build file system node recursively
+   */
+  private async buildFileSystemNode(
+    fullPath: string,
+    rootPath: string,
+    maxDepth: number = 10,
+    currentDepth: number = 0
+  ): Promise<any> {
+    const relativePath = path.relative(rootPath, fullPath);
+    const name = path.basename(fullPath);
+
+    try {
+      const stats = await fs.stat(fullPath);
+
+      if (stats.isDirectory()) {
+        const children: any[] = [];
+        let totalFiles = 0;
+        let totalSize = 0;
+
+        if (currentDepth < maxDepth) {
+          try {
+            const entries = await fs.readdir(fullPath);
+
+            for (const entry of entries) {
+              const entryPath = path.join(fullPath, entry);
+              const childNode = await this.buildFileSystemNode(
+                entryPath,
+                rootPath,
+                maxDepth,
+                currentDepth + 1
+              );
+
+              children.push(childNode);
+
+              if (childNode.type === "file") {
+                totalFiles += 1;
+                totalSize += childNode.size || 0;
+              } else if (childNode.type === "directory") {
+                totalFiles += childNode.file_count || 0;
+                totalSize += childNode.total_size || 0;
+              }
+            }
+          } catch (readError) {
+            // Directory might be empty or inaccessible
+          }
+        }
+
+        return {
+          name,
+          type: "directory",
+          path: relativePath || "/",
+          children: children.length > 0 ? children : undefined,
+          file_count: totalFiles,
+          total_size: totalSize,
+          last_modified: stats.mtime.toISOString(),
+        };
+      } else {
+        const extension = path.extname(fullPath).toLowerCase();
+        const fileType = this.getFileType(extension);
+
+        return {
+          name,
+          type: "file",
+          path: relativePath,
+          size: stats.size,
+          extension: extension || undefined,
+          file_type: fileType,
+          last_modified: stats.mtime.toISOString(),
+        };
+      }
+    } catch (error) {
+      return {
+        name,
+        type: "error",
+        path: relativePath,
+        error_message: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }
+
+  /**
+   * Determine file type based on extension
+   */
+  private getFileType(extension: string): string {
+    const typeMap: { [key: string]: string } = {
+      ".md": "markdown",
+      ".markdown": "markdown",
+      ".json": "json",
+      ".sjson": "sjson",
+      ".txt": "text",
+      ".db": "database",
+      ".sqlite": "database",
+      ".sqlite3": "database",
+      ".log": "log",
+      ".tmp": "temporary",
+      ".cache": "cache",
+      ".bak": "backup",
+      ".yml": "yaml",
+      ".yaml": "yaml",
+      ".toml": "config",
+      ".ini": "config",
+      ".cfg": "config",
+      ".conf": "config",
+    };
+
+    return typeMap[extension] || "unknown";
   }
 
   /**

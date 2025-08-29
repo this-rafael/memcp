@@ -280,6 +280,20 @@ const TOOLS = [
       required: ["project_path"],
     },
   },
+  {
+    name: "get_filesystem_tree",
+    description: "Get file system tree structure with file types",
+    inputSchema: {
+      type: "object",
+      properties: {
+        project_path: {
+          type: "string",
+          description: "Path to the project directory",
+        },
+      },
+      required: ["project_path"],
+    },
+  },
 
   // Maintenance Operations
   {
@@ -459,6 +473,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         );
         return {
           content: [{ type: "text", text: JSON.stringify(tree, null, 2) }],
+        };
+
+      case "get_filesystem_tree":
+        await ensureToolsInitialized(params.project_path);
+        const fsTree = await toolInstances.navigation!.getFileSystemTree();
+        return {
+          content: [{ type: "text", text: JSON.stringify(fsTree, null, 2) }],
         };
 
       case "stats":

@@ -164,6 +164,54 @@ export class SearchIndex {
   }
 
   /**
+   * Validate and fix corrupted index data
+   */
+  validateAndFixIndex(): { fixed: number; errors: string[] } {
+    const errors: string[] = [];
+    let fixed = 0;
+
+    try {
+      // Find all rows with invalid JSON in tags
+      const invalidRowsStmt = this.db.prepare(`
+        SELECT path, tags FROM memory_metadata WHERE tags IS NOT NULL AND tags != ''
+      `);
+
+      const rows = invalidRowsStmt.all() as { path: string; tags: string }[];
+
+      for (const row of rows) {
+        try {
+          JSON.parse(row.tags);
+        } catch (parseError) {
+          try {
+            // Try to fix the tags - convert string to JSON array
+            let fixedTags: string[] = [];
+            if (typeof row.tags === "string") {
+              // If it's a space-separated string, split it
+              fixedTags = row.tags.split(" ").filter(Boolean);
+            }
+
+            const updateStmt = this.db.prepare(`
+              UPDATE memory_metadata SET tags = ? WHERE path = ?
+            `);
+            updateStmt.run(JSON.stringify(fixedTags), row.path);
+            fixed++;
+          } catch (fixError) {
+            errors.push(`Failed to fix tags for ${row.path}: ${fixError}`);
+          }
+        }
+      }
+    } catch (error) {
+      errors.push(
+        `Validation failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    return { fixed, errors };
+  }
+
+  /**
    * Reindex all memories
    */
   async reindexAll(): Promise<{ indexed: number; errors: string[] }> {
@@ -244,10 +292,11 @@ export class SearchIndex {
           m.context,
           m.subcontext,
           m.importance,
-          m.tags,
+          meta.tags,
           snippet(memory_index, 4, '<mark>', '</mark>', '...', 64) as snippet,
           bm25(memory_index) as score
         FROM memory_index m
+        JOIN memory_metadata meta ON m.path = meta.path
         ${filters.joins}
         WHERE memory_index MATCH ?
         ${filters.where}
@@ -267,6 +316,7 @@ export class SearchIndex {
       const countSQL = `
         SELECT COUNT(*) as total
         FROM memory_index m
+        JOIN memory_metadata meta ON m.path = meta.path
         ${filters.joins}
         WHERE memory_index MATCH ?
         ${filters.where}
@@ -278,16 +328,30 @@ export class SearchIndex {
       };
 
       // Convert results
-      const searchResults: SearchResult[] = results.map((row) => ({
-        path: row.path,
-        title: row.title,
-        context: row.context,
-        subcontext: row.subcontext,
-        snippet: row.snippet || "",
-        importance: row.importance,
-        score: Math.abs(row.score), // BM25 scores are negative
-        tags: row.tags ? JSON.parse(row.tags) : [],
-      }));
+      const searchResults: SearchResult[] = results.map((row) => {
+        let tags: string[] = [];
+        try {
+          tags = row.tags ? JSON.parse(row.tags) : [];
+        } catch (parseError) {
+          console.warn(`Failed to parse tags for ${row.path}:`, parseError);
+          // Fallback: if it's a simple string, split by spaces
+          tags =
+            typeof row.tags === "string"
+              ? row.tags.split(" ").filter(Boolean)
+              : [];
+        }
+
+        return {
+          path: row.path,
+          title: row.title,
+          context: row.context,
+          subcontext: row.subcontext,
+          snippet: row.snippet || "",
+          importance: row.importance,
+          score: Math.abs(row.score), // BM25 scores are negative
+          tags,
+        };
+      });
 
       // Get facets
       const facets = this.getFacets(query, {
@@ -427,12 +491,11 @@ export class SearchIndex {
     }
 
     if (options.tags.length > 0) {
-      // Tag filtering using JSON operations
+      // Tag filtering using JSON operations on the already joined metadata table
       const tagConditions = options.tags.map(
         () => `json_extract(meta.tags, '$') LIKE ?`
       );
       conditions.push(`(${tagConditions.join(" OR ")})`);
-      joins = "JOIN memory_metadata meta ON m.path = meta.path";
       params.push(...options.tags.map((tag) => `%"${tag}"%`));
     }
 
