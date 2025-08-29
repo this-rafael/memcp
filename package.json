@@ -1,0 +1,52 @@
+{
+  "name": "memcp",
+  "version": "1.0.5",
+  "type": "module",
+  "description": "MCP Server for hierarchical intelligent memory system with persistent, indexed and cached context",
+  "main": "dist/index.js",
+  "bin": {
+    "memcp": "bin/memory-mcp.mjs"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "watch": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage"
+  },
+  "keywords": ["mcp", "memory", "context", "ai", "cache", "indexing", "hierarchical"],
+  "author": "Rafael S Pereira",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.3",
+    "better-sqlite3": "^9.2.2",
+    "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
+    "gray-matter": "^4.0.3",
+    "json5": "^2.2.3",
+    "minimatch": "^9.0.4",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^20.8.6",
+    "@types/uuid": "^9.0.7",
+    "rimraf": "^5.0.5",
+    "tsx": "^4.15.7",
+    "typescript": "^5.2.2",
+    "vitest": "^1.1.0",
+    "@vitest/ui": "^1.1.0"
+  },
+  "files": [
+    "dist/**/*",
+    "bin/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@10.12.1"
+}
