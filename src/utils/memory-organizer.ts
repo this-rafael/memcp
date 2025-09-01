@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { promises as fsPromises } from "fs";
 import path from "path";
 import { GeminiExecutor } from "../executors/gemini-executor.js";
 import { LinksTools } from "../tools/links.tool.js";
@@ -8,6 +8,60 @@ import { NavigationTools } from "../tools/navigation.tool.js";
 import { SubmemoryTools } from "../tools/submemory.tool.js";
 
 /**
+ * Logger específico para Memory Organizer que escreve em arquivos
+ */
+class MemoryOrganizerLogger {
+  private logFilePath: string;
+
+  constructor(projectPath: string) {
+    const memoryPath = path.join(projectPath, "ia-memory");
+    this.logFilePath = path.join(memoryPath, "organizer.log");
+  }
+
+  private async ensureLogDirectory(): Promise<void> {
+    const logDir = path.dirname(this.logFilePath);
+    try {
+      await fsPromises.access(logDir);
+    } catch {
+      await fsPromises.mkdir(logDir, { recursive: true });
+    }
+  }
+
+  private async writeLog(level: string, message: string): Promise<void> {
+    try {
+      await this.ensureLogDirectory();
+      const timestamp = new Date().toISOString();
+      const logEntry = `${timestamp} [${level}] ${message}\n`;
+      await fsPromises.appendFile(this.logFilePath, logEntry, "utf8");
+    } catch (error) {
+      // Fallback para console.error se não conseguir escrever no arquivo
+      console.error(`Failed to write to log file: ${error}`);
+      console.error(`${level}: ${message}`);
+    }
+  }
+
+  async info(message: string): Promise<void> {
+    await this.writeLog("INFO", message);
+  }
+
+  async error(message: string): Promise<void> {
+    await this.writeLog("ERROR", message);
+  }
+
+  async warn(message: string): Promise<void> {
+    await this.writeLog("WARN", message);
+  }
+
+  async debug(message: string): Promise<void> {
+    await this.writeLog("DEBUG", message);
+  }
+
+  getLogPath(): string {
+    return this.logFilePath;
+  }
+}
+
+/**
  * MemoryOrganizer uses Gemini AI to automatically organize and optimize memory structure
  */
 export class MemoryOrganizer {
@@ -15,6 +69,7 @@ export class MemoryOrganizer {
   private projectPath: string;
   private intervalId: NodeJS.Timeout | null = null;
   private isRunning = false;
+  private logger: MemoryOrganizerLogger;
 
   // Tool instances
   private mainMemory: MainMemoryTools;
@@ -26,6 +81,7 @@ export class MemoryOrganizer {
   constructor(projectPath: string) {
     this.projectPath = projectPath;
     this.gemini = GeminiExecutor.create();
+    this.logger = new MemoryOrganizerLogger(projectPath);
 
     // Initialize tool instances with memory path
     const memoryPath = path.join(projectPath, "ia-memory");
@@ -41,12 +97,12 @@ export class MemoryOrganizer {
    */
   start(intervalMinutes = 1): void {
     if (this.isRunning) {
-      console.log("🤖 Memory organizer already running");
+      this.logger.warn("Memory organizer already running");
       return;
     }
 
-    console.log(
-      `🤖 Starting memory organizer for ${this.projectPath} (every ${intervalMinutes}min)`
+    this.logger.info(
+      `Starting memory organizer for ${this.projectPath} (every ${intervalMinutes}min)`
     );
     this.isRunning = true;
 
@@ -67,7 +123,7 @@ export class MemoryOrganizer {
       this.intervalId = null;
     }
     this.isRunning = false;
-    console.log("🤖 Memory organizer stopped");
+    this.logger.info("Memory organizer stopped");
   }
 
   /**
@@ -82,17 +138,15 @@ export class MemoryOrganizer {
    */
   private async runOrganization(): Promise<void> {
     try {
-      console.log(
-        `🤖 [${new Date().toISOString()}] Running memory organization for ${
-          this.projectPath
-        }`
+      await this.logger.info(
+        `Running memory organization for ${this.projectPath}`
       );
 
       // Check if ia-memory directory exists
       const memoryPath = path.join(this.projectPath, "ia-memory");
       if (!fs.existsSync(memoryPath)) {
-        console.log(
-          `🤖 No ia-memory directory found in ${this.projectPath}, skipping`
+        await this.logger.warn(
+          `No ia-memory directory found in ${this.projectPath}, skipping`
         );
         return;
       }
@@ -112,11 +166,12 @@ export class MemoryOrganizer {
       // 4. Execute approved recommendations (yolo mode)
       await this.executeRecommendations(recommendations);
 
-      console.log(`🤖 Memory organization completed for ${this.projectPath}`);
+      await this.logger.info(
+        `Memory organization completed for ${this.projectPath}`
+      );
     } catch (error) {
-      console.error(
-        `🤖 Error in memory organization for ${this.projectPath}:`,
-        error
+      await this.logger.error(
+        `Error in memory organization for ${this.projectPath}: ${error}`
       );
     }
   }
@@ -167,7 +222,7 @@ export class MemoryOrganizer {
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error("Error analyzing memory:", error);
+      await this.logger.error(`Error analyzing memory: ${error}`);
       return { error: (error as Error).message };
     }
   }
@@ -323,17 +378,19 @@ Analise e organize! 🚀
       // Try to parse the entire response as JSON
       return JSON.parse(response);
     } catch (error) {
-      console.error("Error generating recommendations:", error);
+      await this.logger.error(`Error generating recommendations: ${error}`);
 
       // Fallback: create simple recommendations based on analysis
-      return this.createFallbackRecommendations(memoryAnalysis);
+      return await this.createFallbackRecommendations(memoryAnalysis);
     }
   }
 
   /**
    * Create fallback recommendations when Gemini fails
    */
-  private createFallbackRecommendations(memoryAnalysis: any): any {
+  private async createFallbackRecommendations(
+    memoryAnalysis: any
+  ): Promise<any> {
     const recommendations = [];
 
     try {
@@ -386,7 +443,9 @@ Analise e organize! 🚀
         }
       }
     } catch (error) {
-      console.error("Error creating fallback recommendations:", error);
+      await this.logger.error(
+        `Error creating fallback recommendations: ${error}`
+      );
     }
 
     return {
@@ -404,11 +463,11 @@ Analise e organize! 🚀
    */
   private async executeRecommendations(recommendations: any): Promise<void> {
     if (!recommendations || !recommendations.recommendations) {
-      console.log("🤖 No recommendations to execute");
+      await this.logger.error("🤖 No recommendations to execute");
       return;
     }
 
-    console.log(
+    await this.logger.info(
       `🤖 Executing ${recommendations.recommendations.length} recommendations in YOLO mode`
     );
 
@@ -428,7 +487,7 @@ Analise e organize! 🚀
 
     for (const recommendation of sortedRecommendations) {
       try {
-        console.log(`🤖 Executing: ${recommendation.description}`);
+        await this.logger.info(`🤖 Executing: ${recommendation.description}`);
 
         const action = recommendation.action;
         const params = { project_path: this.projectPath, ...action.params };
@@ -471,14 +530,13 @@ Analise e organize! 🚀
             break;
 
           default:
-            console.log(`🤖 Unknown function: ${action.function}`);
+            await this.logger.warn(`🤖 Unknown function: ${action.function}`);
         }
 
-        console.log(`✅ Executed: ${recommendation.description}`);
+        await this.logger.info(`✅ Executed: ${recommendation.description}`);
       } catch (error) {
-        console.error(
-          `❌ Failed to execute: ${recommendation.description}`,
-          error
+        await this.logger.error(
+          `❌ Failed to execute: ${recommendation.description} - ${error}`
         );
       }
     }
@@ -504,13 +562,9 @@ export class MultiPathMemoryOrganizer {
    */
   start(projectPaths: string[], intervalMinutes = 1): void {
     if (this.isRunning) {
-      console.log("🤖 Multi-path memory organizer already running");
       return;
     }
 
-    console.log(
-      `🤖 Starting memory organizer for ${projectPaths.length} projects`
-    );
     this.isRunning = true;
 
     for (const projectPath of projectPaths) {
@@ -524,8 +578,6 @@ export class MultiPathMemoryOrganizer {
    * Stop all memory organizers
    */
   stop(): void {
-    console.log("🤖 Stopping all memory organizers");
-
     for (const organizer of this.organizers.values()) {
       organizer.stop();
     }
