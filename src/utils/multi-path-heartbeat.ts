@@ -1,12 +1,15 @@
-import { promises as fs } from 'fs';
-import * as path from 'path';
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
+import { promises as fs } from "fs";
+import * as path from "path";
+import { MultiPathMemoryOrganizer } from "./memory-organizer.js";
 
 export interface MultiPathHeartbeatOptions {
   interval?: number; // em segundos
   paths?: string[];
   filename?: string;
   enabled?: boolean;
+  memoryOrganizerEnabled?: boolean; // Nova opção para organização de memória
+  memoryOrganizerInterval?: number; // Intervalo em minutos para organização
 }
 
 /**
@@ -18,19 +21,27 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
   private options: Required<MultiPathHeartbeatOptions>;
   private isRunning = false;
   private heartbeatFiles: Map<string, string> = new Map();
+  private memoryOrganizer: MultiPathMemoryOrganizer | null = null;
 
   constructor(options: MultiPathHeartbeatOptions = {}) {
     super();
-    
+
     this.options = {
       interval: options.interval || 10, // 10 segundos por padrão
       paths: options.paths || [process.cwd()],
-      filename: options.filename || 'heartbeat.log',
-      enabled: options.enabled !== false // habilitado por padrão
+      filename: options.filename || "heartbeat.log",
+      enabled: options.enabled !== false, // habilitado por padrão
+      memoryOrganizerEnabled: options.memoryOrganizerEnabled !== false, // habilitado por padrão
+      memoryOrganizerInterval: options.memoryOrganizerInterval || 1, // 1 minuto por padrão
     };
 
     // Configurar os caminhos dos arquivos de heartbeat
     this.setupHeartbeatFiles();
+
+    // Inicializar organizador de memória se habilitado
+    if (this.options.memoryOrganizerEnabled) {
+      this.memoryOrganizer = new MultiPathMemoryOrganizer();
+    }
   }
 
   /**
@@ -38,9 +49,9 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
    */
   private setupHeartbeatFiles(): void {
     this.heartbeatFiles.clear();
-    
+
     for (const projectPath of this.options.paths) {
-      const memoryPath = path.join(projectPath, 'ia-memory');
+      const memoryPath = path.join(projectPath, "ia-memory");
       const filePath = path.join(memoryPath, this.options.filename);
       this.heartbeatFiles.set(projectPath, filePath);
     }
@@ -51,48 +62,47 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
    */
   async start(): Promise<void> {
     if (this.isRunning) {
-      console.error('Multi-path heartbeat monitor already running');
+      console.error("Multi-path heartbeat monitor is already running");
       return;
     }
 
     if (!this.options.enabled) {
-      console.error('Multi-path heartbeat monitor disabled');
+      console.error("Multi-path heartbeat monitor is disabled");
       return;
     }
 
+    this.isRunning = true;
+
     try {
-      // Garantir que os diretórios ia-memory existem em todos os paths
+      // Garantir que os diretórios ia-memory existem
       await this.ensureMemoryDirectories();
-      
-      // Escrever entrada inicial em todos os arquivos
-      await this.writeHeartbeatToAll('STARTED');
-      
-      this.isRunning = true;
-      
-      // Configurar interval
-      this.interval = setInterval(async () => {
-        try {
-          await this.writeHeartbeatToAll('RUNNING');
-          this.emit('heartbeat', { 
-            timestamp: new Date(), 
-            status: 'RUNNING',
-            paths: this.options.paths 
-          });
-        } catch (error) {
-          this.emit('error', error);
-          console.error('Multi-path heartbeat write error:', error);
-        }
+
+      // Escrever heartbeat inicial
+      await this.writeHeartbeatToAll("STARTED");
+
+      // Configurar o interval
+      this.interval = setInterval(() => {
+        this.writeHeartbeatToAll("RUNNING").catch((error) => {
+          this.emit("error", error);
+        });
       }, this.options.interval * 1000);
 
-      console.error(`Multi-path heartbeat monitor started - monitoring ${this.options.paths.length} paths every ${this.options.interval}s`);
-      this.options.paths.forEach(p => {
+      console.error(
+        `Multi-path heartbeat monitor started for ${this.options.paths.length} paths (${this.options.interval}s interval)`
+      );
+      this.options.paths.forEach((p) => {
         console.error(`  - ${this.heartbeatFiles.get(p)}`);
       });
-      
-      this.emit('started');
-      
+
+      // Iniciar organizador de memória se habilitado
+      if (this.memoryOrganizer && this.options.memoryOrganizerEnabled) {
+        console.error("🤖 Starting memory organizer with YOLO mode");
+        this.memoryOrganizer.start(this.options.paths, this.options.memoryOrganizerInterval);
+      }
+
+      this.emit("started");
     } catch (error) {
-      this.emit('error', error);
+      this.emit("error", error);
       throw error;
     }
   }
@@ -110,15 +120,21 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
       this.interval = null;
     }
 
+    // Parar organizador de memória
+    if (this.memoryOrganizer) {
+      console.error("🤖 Stopping memory organizer");
+      this.memoryOrganizer.stop();
+    }
+
     try {
-      await this.writeHeartbeatToAll('STOPPED');
-      this.emit('stopped');
+      await this.writeHeartbeatToAll("STOPPED");
+      this.emit("stopped");
     } catch (error) {
-      this.emit('error', error);
+      this.emit("error", error);
     }
 
     this.isRunning = false;
-    console.error('Multi-path heartbeat monitor stopped');
+    console.error("Multi-path heartbeat monitor stopped");
   }
 
   /**
@@ -126,8 +142,8 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
    */
   private async ensureMemoryDirectories(): Promise<void> {
     const promises = this.options.paths.map(async (projectPath) => {
-      const memoryPath = path.join(projectPath, 'ia-memory');
-      
+      const memoryPath = path.join(projectPath, "ia-memory");
+
       try {
         await fs.access(memoryPath);
       } catch {
@@ -143,23 +159,28 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
   /**
    * Escrever entrada de heartbeat em todos os arquivos
    */
-  private async writeHeartbeatToAll(status: string = 'RUNNING'): Promise<void> {
+  private async writeHeartbeatToAll(status: string = "RUNNING"): Promise<void> {
     const timestamp = new Date().toISOString();
     const entry = `${timestamp} - ${status} - PID:${process.pid}\n`;
 
-    const promises = Array.from(this.heartbeatFiles.entries()).map(async ([projectPath, filePath]) => {
-      try {
-        await fs.appendFile(filePath, entry, 'utf8');
-      } catch (error) {
-        // Se falhar ao escrever, tentar criar o arquivo
+    const promises = Array.from(this.heartbeatFiles.entries()).map(
+      async ([projectPath, filePath]) => {
         try {
-          await fs.writeFile(filePath, entry, 'utf8');
-        } catch (createError) {
-          console.error(`Failed to write heartbeat for ${projectPath}:`, createError);
-          throw createError;
+          await fs.appendFile(filePath, entry, "utf8");
+        } catch (error) {
+          // Se falhar ao escrever, tentar criar o arquivo
+          try {
+            await fs.writeFile(filePath, entry, "utf8");
+          } catch (createError) {
+            console.error(
+              `Failed to write heartbeat for ${projectPath}:`,
+              createError
+            );
+            throw createError;
+          }
         }
       }
-    });
+    );
 
     await Promise.all(promises);
   }
@@ -167,15 +188,21 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
   /**
    * Ler últimas entradas do heartbeat de um path específico
    */
-  async getRecentHeartbeats(projectPath: string, lines: number = 10): Promise<string[]> {
+  async getRecentHeartbeats(
+    projectPath: string,
+    lines: number = 10
+  ): Promise<string[]> {
     const filePath = this.heartbeatFiles.get(projectPath);
     if (!filePath) {
       throw new Error(`Path not monitored: ${projectPath}`);
     }
 
     try {
-      const content = await fs.readFile(filePath, 'utf8');
-      const allLines = content.trim().split('\n').filter(line => line.length > 0);
+      const content = await fs.readFile(filePath, "utf8");
+      const allLines = content
+        .trim()
+        .split("\n")
+        .filter((line) => line.length > 0);
       return allLines.slice(-lines);
     } catch (error) {
       return [];
@@ -185,17 +212,21 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
   /**
    * Ler últimas entradas de todos os paths monitorados
    */
-  async getAllRecentHeartbeats(lines: number = 10): Promise<Record<string, string[]>> {
+  async getAllRecentHeartbeats(
+    lines: number = 10
+  ): Promise<Record<string, string[]>> {
     const result: Record<string, string[]> = {};
 
-    const promises = Array.from(this.heartbeatFiles.keys()).map(async (projectPath) => {
-      try {
-        const entries = await this.getRecentHeartbeats(projectPath, lines);
-        result[projectPath] = entries;
-      } catch (error) {
-        result[projectPath] = [];
+    const promises = Array.from(this.heartbeatFiles.keys()).map(
+      async (projectPath) => {
+        try {
+          const entries = await this.getRecentHeartbeats(projectPath, lines);
+          result[projectPath] = entries;
+        } catch (error) {
+          result[projectPath] = [];
+        }
       }
-    });
+    );
 
     await Promise.all(promises);
     return result;
@@ -205,20 +236,30 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
    * Limpar arquivos de heartbeat (manter apenas últimas N entradas)
    */
   async cleanup(keepLines: number = 1000): Promise<void> {
-    const promises = Array.from(this.heartbeatFiles.entries()).map(async ([projectPath, filePath]) => {
-      try {
-        const content = await fs.readFile(filePath, 'utf8');
-        const lines = content.trim().split('\n').filter(line => line.length > 0);
-        
-        if (lines.length > keepLines) {
-          const toKeep = lines.slice(-keepLines);
-          await fs.writeFile(filePath, toKeep.join('\n') + '\n', 'utf8');
-          console.error(`Heartbeat log cleaned up for ${projectPath} - kept last ${keepLines} entries`);
+    const promises = Array.from(this.heartbeatFiles.entries()).map(
+      async ([projectPath, filePath]) => {
+        try {
+          const content = await fs.readFile(filePath, "utf8");
+          const lines = content
+            .trim()
+            .split("\n")
+            .filter((line) => line.length > 0);
+
+          if (lines.length > keepLines) {
+            const toKeep = lines.slice(-keepLines);
+            await fs.writeFile(filePath, toKeep.join("\n") + "\n", "utf8");
+            console.error(
+              `Heartbeat log cleaned up for ${projectPath} - kept last ${keepLines} entries`
+            );
+          }
+        } catch (error) {
+          console.error(
+            `Failed to cleanup heartbeat log for ${projectPath}:`,
+            error
+          );
         }
-      } catch (error) {
-        console.error(`Failed to cleanup heartbeat log for ${projectPath}:`, error);
       }
-    });
+    );
 
     await Promise.all(promises);
   }
@@ -232,7 +273,7 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
       paths: this.options.paths,
       heartbeatFiles: Object.fromEntries(this.heartbeatFiles),
       interval: this.options.interval,
-      pid: process.pid
+      pid: process.pid,
     };
   }
 
@@ -248,11 +289,18 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
 // Função para criar instância baseada em variáveis de ambiente
 export function createHeartbeatFromEnv(): MultiPathHeartbeatMonitor {
   const pathsEnv = process.env.MCP_MONITORING_PATHS;
-  const paths = pathsEnv ? pathsEnv.split(',').map(p => p.trim()).filter(p => p.length > 0) : [process.cwd()];
-  
+  const paths = pathsEnv
+    ? pathsEnv
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0)
+    : [process.cwd()];
+
   return new MultiPathHeartbeatMonitor({
     paths,
-    interval: parseInt(process.env.MCP_HEARTBEAT_INTERVAL || '10'),
-    enabled: process.env.MCP_HEARTBEAT !== 'false'
+    interval: parseInt(process.env.MCP_HEARTBEAT_INTERVAL || "10"),
+    enabled: process.env.MCP_HEARTBEAT !== "false",
+    memoryOrganizerEnabled: process.env.MCP_MEMORY_ORGANIZER !== "false",
+    memoryOrganizerInterval: parseInt(process.env.MCP_MEMORY_ORGANIZER_INTERVAL || "1")
   });
 }

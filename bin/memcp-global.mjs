@@ -25,6 +25,9 @@ Options:
   --no-parallel      Disable parallel processing
   --no-background    Disable background tasks
   --paths <paths>     Comma-separated paths to monitor (e.g., "/path1,/path2")
+  --yolo             Enable aggressive memory organization (YOLO mode)
+  --memory-organizer <n>  Memory organizer interval in minutes (default: 1)
+  --no-memory-organizer   Disable automatic memory organization
   --help, -h         Show this help
 
 Examples:
@@ -34,13 +37,17 @@ Examples:
   memcp /path/to/project         # Start in specific project directory
   memcp --no-heartbeat           # Disable monitoring
   memcp --paths "/home/user/proj1,/home/user/proj2"  # Monitor multiple paths
+  memcp --yolo                   # Enable aggressive memory organization
+  memcp --memory-organizer 2     # Organize memory every 2 minutes
 
 Environment Variables:
-  MEMORY_PROJECT_PATH    Project path (overrides argument)
-  MCP_MAX_WORKERS       Number of workers
-  MCP_HEARTBEAT         Enable/disable heartbeat (true/false)
-  MCP_HEARTBEAT_INTERVAL Heartbeat interval in seconds
-  MCP_MONITORING_PATHS  Comma-separated paths to monitor
+  MEMORY_PROJECT_PATH          Project path (overrides argument)
+  MCP_MAX_WORKERS             Number of workers
+  MCP_HEARTBEAT               Enable/disable heartbeat (true/false)
+  MCP_HEARTBEAT_INTERVAL      Heartbeat interval in seconds
+  MCP_MONITORING_PATHS        Comma-separated paths to monitor
+  MCP_MEMORY_ORGANIZER        Enable/disable memory organizer (true/false)
+  MCP_MEMORY_ORGANIZER_INTERVAL Memory organizer interval in minutes
 `);
 }
 
@@ -61,6 +68,9 @@ function main() {
   let enableBackground = true;
   let projectPath = process.cwd();
   let monitoringPaths = [];
+  let memoryOrganizerEnabled = true;
+  let memoryOrganizerInterval = 1; // minutes
+  let yoloMode = false;
 
   // Parse arguments
   for (let i = 0; i < args.length; i++) {
@@ -79,6 +89,12 @@ function main() {
     } else if (arg === '--paths' && i + 1 < args.length) {
       const pathsString = args[++i];
       monitoringPaths = pathsString.split(',').map(p => p.trim()).filter(p => p.length > 0);
+    } else if (arg === '--yolo' || arg === '-y') {
+      yoloMode = true;
+    } else if (arg === '--memory-organizer' && i + 1 < args.length) {
+      memoryOrganizerInterval = parseInt(args[++i]);
+    } else if (arg === '--no-memory-organizer') {
+      memoryOrganizerEnabled = false;
     } else if (!arg.startsWith('--')) {
       // Assume it's a project path
       projectPath = arg;
@@ -104,6 +120,12 @@ function main() {
       monitoringPaths = envPaths;
     }
   }
+  if (process.env.MCP_MEMORY_ORGANIZER === 'false') {
+    memoryOrganizerEnabled = false;
+  }
+  if (process.env.MCP_MEMORY_ORGANIZER_INTERVAL) {
+    memoryOrganizerInterval = parseInt(process.env.MCP_MEMORY_ORGANIZER_INTERVAL);
+  }
 
   // If no monitoring paths specified, use the main project path
   if (monitoringPaths.length === 0) {
@@ -117,6 +139,8 @@ function main() {
   console.error(`Heartbeat: ${enableHeartbeat ? heartbeatInterval + 's' : 'disabled'}`);
   console.error(`Parallel: ${enableParallel}`);
   console.error(`Background Tasks: ${enableBackground}`);
+  console.error(`Memory Organizer: ${memoryOrganizerEnabled} ${memoryOrganizerEnabled ? `(${memoryOrganizerInterval}min)` : ''}`);
+  console.error(`YOLO Mode: ${yoloMode}`);
   console.error('');
 
   // Build command
@@ -143,7 +167,10 @@ function main() {
     MCP_HEARTBEAT_INTERVAL: heartbeatInterval.toString(),
     MCP_PARALLEL: enableParallel.toString(),
     MCP_BACKGROUND_TASKS: enableBackground.toString(),
-    MCP_MONITORING_PATHS: monitoringPaths.join(',')
+    MCP_MONITORING_PATHS: monitoringPaths.join(','),
+    MCP_MEMORY_ORGANIZER: memoryOrganizerEnabled.toString(),
+    MCP_MEMORY_ORGANIZER_INTERVAL: memoryOrganizerInterval.toString(),
+    MCP_YOLO_MODE: yoloMode.toString()
   };
 
   // Spawn the launcher

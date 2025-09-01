@@ -18,6 +18,7 @@ A sophisticated MCP (Model Context Protocol) server implementation that provides
 ## 📦 Installation
 
 ### Local Installation
+
 ```bash
 # Install dependencies
 npm install
@@ -30,6 +31,7 @@ npm start
 ```
 
 ### Global Installation
+
 ```bash
 # Install globally
 npm link
@@ -41,6 +43,7 @@ memcp --help
 ## 🏃 Quick Start
 
 ### Basic Usage
+
 ```bash
 # Initialize memory system for current directory
 memcp init --project-path $(pwd)
@@ -56,6 +59,7 @@ memcp --paths "/home/user/project1,/home/user/project2"
 ```
 
 ### Memory Operations
+
 ```bash
 # Create a new memory
 memcp memory create --context "project" --subcontext "tasks" --title "Feature Implementation" --content "Implement user authentication system"
@@ -70,6 +74,7 @@ memcp stats
 ## 🔧 Configuration
 
 ### Environment Variables
+
 - `MCP_SERVER_PORT`: Server port (default: 3000)
 - `MCP_LOG_LEVEL`: Logging level (debug, info, warn, error)
 - `MCP_PROJECT_PATH`: Default project path for memory operations
@@ -77,6 +82,7 @@ memcp stats
 - `MCP_HEARTBEAT_INTERVAL`: Heartbeat interval in seconds (default: 10)
 
 ### Command Line Options
+
 ```bash
 memcp [options]
 
@@ -120,7 +126,9 @@ bin/
 ## 🔍 Monitoring System
 
 ### Heartbeat Files
+
 The system creates `ia-memory/heartbeat.log` files in monitored directories with entries like:
+
 ```
 2025-09-01T11:17:08.486Z - STARTED - PID:151868
 2025-09-01T11:17:11.491Z - RUNNING - PID:151868
@@ -129,6 +137,7 @@ The system creates `ia-memory/heartbeat.log` files in monitored directories with
 ```
 
 ### Real-time Monitoring
+
 ```bash
 # Monitor single path heartbeat
 tail -f ia-memory/heartbeat.log
@@ -144,6 +153,7 @@ memcp heartbeat_status --project-path /path/to/project
 ## 🔧 API Reference
 
 ### Memory Operations
+
 - `memory_create`: Create a new memory entry
 - `memory_read`: Read memory by path
 - `memory_main_get`: Get main memory or specific section
@@ -151,21 +161,25 @@ memcp heartbeat_status --project-path /path/to/project
 - `memory_main_add_context`: Add new context to main memory
 
 ### Search Operations
+
 - `search_memories`: Full-text search across memories
 - `get_memory_tree`: Get memory tree structure
 - `get_filesystem_tree`: Get file system tree
 
 ### Link Management
+
 - `links_create`: Create new link between memories
 - `links_read`: Read links for context/subcontext
 
 ### System Operations
+
 - `init`: Initialize memory system
 - `stats`: Get system statistics
 - `validate_system`: Validate system integrity
 - `heartbeat_status`: Get heartbeat monitor status
 
 ### Parallel Processing
+
 - `parallel_memory_tools`: Access to parallelized memory operations
 - Background task queue management
 - Worker thread pool management
@@ -174,12 +188,14 @@ memcp heartbeat_status --project-path /path/to/project
 ## 📊 Performance Features
 
 ### Parallel Processing
+
 - **Worker Threads**: Dedicated workers for search and indexing operations
 - **Cluster Management**: Multiple server instances for load balancing
 - **Background Tasks**: Non-blocking operations for system maintenance
 - **Connection Pooling**: Efficient resource management
 
 ### Monitoring & Health
+
 - **Heartbeat System**: Real-time health monitoring across multiple directories
 - **Process Management**: Automatic PID tracking and lifecycle management
 - **System Statistics**: Performance metrics and usage analytics
@@ -188,6 +204,7 @@ memcp heartbeat_status --project-path /path/to/project
 ## 🎯 Usage Examples
 
 ### Single Project Monitoring
+
 ```bash
 # Start in current directory with default settings
 memcp
@@ -197,6 +214,7 @@ memcp --heartbeat 3
 ```
 
 ### Multi-Project Monitoring
+
 ```bash
 # Monitor multiple projects
 memcp --paths "/home/user/project1,/home/user/project2,/home/user/project3"
@@ -207,6 +225,7 @@ memcp
 ```
 
 ### Development Workflow
+
 ```bash
 # Initialize new project
 cd /path/to/new/project

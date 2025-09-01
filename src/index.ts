@@ -18,7 +18,10 @@ import { NavigationTools } from "./tools/navigation.tool.js";
 import { SubmemoryTools } from "./tools/submemory.tool.js";
 import { FileSystemUtils } from "./utils/file-system.js";
 import { HeartbeatMonitor } from "./utils/heartbeat-monitor.js";
-import { MultiPathHeartbeatMonitor, createHeartbeatFromEnv } from "./utils/multi-path-heartbeat.js";
+import {
+  MultiPathHeartbeatMonitor,
+  createHeartbeatFromEnv,
+} from "./utils/multi-path-heartbeat.js";
 
 import { ToolParams } from "./types.js";
 
@@ -607,25 +610,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
           if (multiPathHeartbeat) {
             // Multi-path monitoring
-            const allRecentEntries = await multiPathHeartbeat.getAllRecentHeartbeats(lines);
+            const allRecentEntries =
+              await multiPathHeartbeat.getAllRecentHeartbeats(lines);
             const status = multiPathHeartbeat.getStatus();
-            
+
             heartbeatStatus = {
-              type: 'multi-path',
+              type: "multi-path",
               monitor: status,
               recent_entries: allRecentEntries,
-              total_paths: status.paths.length
+              total_paths: status.paths.length,
             };
           } else if (heartbeatMonitor) {
             // Single path monitoring
-            const recentEntries = await heartbeatMonitor.getRecentHeartbeats(lines);
+            const recentEntries = await heartbeatMonitor.getRecentHeartbeats(
+              lines
+            );
             const status = heartbeatMonitor.getStatus();
-            
+
             heartbeatStatus = {
-              type: 'single-path',
+              type: "single-path",
               monitor: status,
               recent_entries: { [params.project_path]: recentEntries },
-              total_paths: 1
+              total_paths: 1,
             };
           } else {
             // Create temporary heartbeat monitor to read status
@@ -634,14 +640,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               enabled: false, // Don't start monitoring, just read
             });
 
-            const recentEntries = await tempHeartbeat.getRecentHeartbeats(lines);
+            const recentEntries = await tempHeartbeat.getRecentHeartbeats(
+              lines
+            );
             const status = tempHeartbeat.getStatus();
-            
+
             heartbeatStatus = {
-              type: 'temporary',
+              type: "temporary",
               monitor: { isRunning: false },
               recent_entries: { [params.project_path]: recentEntries },
-              file_status: status
+              file_status: status,
             };
           }
 
@@ -1004,7 +1012,7 @@ async function main() {
   const heartbeatEnabled = process.env.MCP_HEARTBEAT !== "false";
   if (heartbeatEnabled) {
     const monitoringPaths = process.env.MCP_MONITORING_PATHS;
-    
+
     if (monitoringPaths) {
       // Multi-path monitoring
       multiPathHeartbeat = createHeartbeatFromEnv();
@@ -1012,8 +1020,10 @@ async function main() {
       // Configurar eventos do multi-path heartbeat
       multiPathHeartbeat.on("started", () => {
         const status = multiPathHeartbeat!.getStatus();
-        console.error(`Multi-path heartbeat monitor started - monitoring ${status.paths.length} paths`);
-        status.paths.forEach(path => {
+        console.error(
+          `Multi-path heartbeat monitor started - monitoring ${status.paths.length} paths`
+        );
+        status.paths.forEach((path) => {
           console.error(`  - ${path}/ia-memory/heartbeat.log`);
         });
       });
@@ -1074,8 +1084,8 @@ main().catch((error) => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
-  console.error('Received SIGTERM, shutting down gracefully...');
+process.on("SIGTERM", async () => {
+  console.error("Received SIGTERM, shutting down gracefully...");
   if (heartbeatMonitor) {
     await heartbeatMonitor.stop();
   }
@@ -1085,8 +1095,8 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-process.on('SIGINT', async () => {
-  console.error('Received SIGINT, shutting down gracefully...');
+process.on("SIGINT", async () => {
+  console.error("Received SIGINT, shutting down gracefully...");
   if (heartbeatMonitor) {
     await heartbeatMonitor.stop();
   }
