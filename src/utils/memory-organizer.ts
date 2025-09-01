@@ -378,7 +378,7 @@ Analise e organize! 🚀
       const response = await this.gemini.execute(
         "Analise a estrutura de memória e gere recomendações de organização",
         prompt,
-        30 // 30 seconds timeout instead of 300
+        120 // 2 minutes timeout for comprehensive analysis
       );
 
       // Extract JSON from response
