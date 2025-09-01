@@ -438,21 +438,33 @@ Analise e organize! 🚀
 
         // Recommend organizing contexts if there are too many
         if (stats.total_contexts > 8) {
-          recommendations.push({
-            type: "create_context",
-            priority: "low",
-            description:
-              "Criar contexto para consolidar informações fragmentadas",
-            action: {
-              function: "memory_main_add_context",
-              params: {
-                name: "consolidation",
+          // Check if consolidation context already exists
+          try {
+            const mainMemory = await this.mainMemory.memoryMainGet();
+            const contextExists = mainMemory.contexts && 
+              mainMemory.contexts.find((ctx: any) => ctx.name === "consolidation");
+            
+            if (!contextExists) {
+              recommendations.push({
+                type: "create_context",
+                priority: "low",
                 description:
-                  "Contexto para consolidar e organizar informações que estão espalhadas em múltiplos contextos",
-                priority: 6,
-              },
-            },
-          });
+                  "Criar contexto para consolidar informações fragmentadas",
+                action: {
+                  function: "memory_main_add_context",
+                  params: {
+                    name: "consolidation",
+                    description:
+                      "Contexto para consolidar e organizar informações que estão espalhadas em múltiplos contextos",
+                    priority: 6,
+                  },
+                },
+              });
+            }
+          } catch (error) {
+            // If we can't check, skip this recommendation to be safe
+            await this.logger.warn(`Could not check existing contexts: ${error}`);
+          }
         }
       }
     } catch (error) {
@@ -516,22 +528,37 @@ Analise e organize! 🚀
             break;
 
           case "memory_main_add_context":
-            await this.mainMemory.memoryMainAddContext(
-              params.name,
-              params.description,
-              params.priority
-            );
+            try {
+              // Check if context already exists
+              const mainMemory = await this.mainMemory.memoryMainGet();
+              if (mainMemory.contexts && mainMemory.contexts.find((ctx: any) => ctx.name === params.name)) {
+                await this.logger.info(`Context '${params.name}' already exists, skipping`);
+                break;
+              }
+              
+              await this.mainMemory.memoryMainAddContext(
+                params.name,
+                params.description,
+                params.priority
+              );
+            } catch (error) {
+              await this.logger.error(`Failed to add context ${params.name}: ${error}`);
+            }
             break;
 
           case "memory_create":
-            await this.memory.memoryCreate(
-              params.context,
-              params.subcontext,
-              params.title,
-              params.content,
-              params.importance,
-              params.tags
-            );
+            try {
+              await this.memory.memoryCreate(
+                params.context,
+                params.subcontext,
+                params.title,
+                params.content,
+                params.importance,
+                params.tags
+              );
+            } catch (error) {
+              await this.logger.error(`Failed to create memory '${params.title}': ${error}`);
+            }
             break;
 
           case "submemory_create":
