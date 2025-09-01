@@ -11,7 +11,7 @@ async function demonstrateMemoryOrganizer() {
   console.log("🤖 MemCP Memory Organizer - YOLO Mode Demo");
   console.log("==========================================\n");
 
-  const projectPath = "/home/wisiex/work/azify-liquidity-engine";
+  const projectPath = "/home/xxxx";
   const memoryPath = path.join(projectPath, "ia-memory");
   
   try {
