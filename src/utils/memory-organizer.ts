@@ -152,9 +152,10 @@ export class MemoryOrganizer {
       // Check if we ran recently (prevent spam)
       const lastRunFile = path.join(memoryPath, ".last-organization");
       if (fs.existsSync(lastRunFile)) {
-        const lastRun = new Date(fs.readFileSync(lastRunFile, 'utf8'));
+        const lastRun = new Date(fs.readFileSync(lastRunFile, "utf8"));
         const timeSinceLastRun = Date.now() - lastRun.getTime();
-        if (timeSinceLastRun < 5 * 60 * 1000) { // 5 minutes minimum
+        if (timeSinceLastRun < 5 * 60 * 1000) {
+          // 5 minutes minimum
           await this.logger.info("Organization skipped - ran recently");
           return;
         }
