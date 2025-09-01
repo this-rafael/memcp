@@ -294,6 +294,15 @@ const TOOLS = [
       required: ["project_path"],
     },
   },
+  {
+    name: "help",
+    description: "List all available tools and resources with descriptions",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
+  },
 
   // Maintenance Operations
   {
@@ -488,6 +497,182 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [
             { type: "text", text: JSON.stringify(systemStats, null, 2) },
+          ],
+        };
+
+      case "help":
+        const helpContent = {
+          memcp_version: "1.0.8",
+          total_tools: 14,
+          total_resources: 3,
+          tools: [
+            {
+              category: "Inicialização",
+              tools: [
+                {
+                  name: "init",
+                  description: "Initialize memory system for a project",
+                  params: ["project_path"],
+                },
+              ],
+            },
+            {
+              category: "Manutenção",
+              tools: [
+                {
+                  name: "validate_system",
+                  description: "Validate system integrity",
+                  params: ["project_path"],
+                },
+                {
+                  name: "help",
+                  description: "List all available tools and resources",
+                  params: [],
+                },
+              ],
+            },
+            {
+              category: "Memória Principal",
+              tools: [
+                {
+                  name: "memory_main_get",
+                  description: "Get main memory or specific section",
+                  params: ["project_path", "section?"],
+                },
+                {
+                  name: "memory_main_update",
+                  description: "Update main memory section",
+                  params: ["project_path", "section", "data"],
+                },
+                {
+                  name: "memory_main_add_context",
+                  description: "Add new context to main memory",
+                  params: ["project_path", "name", "description", "priority"],
+                },
+              ],
+            },
+            {
+              category: "Links",
+              tools: [
+                {
+                  name: "links_create",
+                  description: "Create new link",
+                  params: [
+                    "project_path",
+                    "context",
+                    "subcontext",
+                    "description",
+                    "memory_path",
+                  ],
+                },
+                {
+                  name: "links_read",
+                  description: "Read links for context/subcontext",
+                  params: ["project_path", "context", "subcontext?"],
+                },
+              ],
+            },
+            {
+              category: "Memórias",
+              tools: [
+                {
+                  name: "memory_create",
+                  description: "Create new memory",
+                  params: [
+                    "project_path",
+                    "context",
+                    "subcontext",
+                    "title",
+                    "content",
+                    "tags?",
+                    "importance?",
+                  ],
+                },
+                {
+                  name: "memory_read",
+                  description: "Read memory by path",
+                  params: ["project_path", "memory_path"],
+                },
+              ],
+            },
+            {
+              category: "Busca",
+              tools: [
+                {
+                  name: "search_memories",
+                  description: "Search memories with full-text search",
+                  params: ["project_path", "query", "options?"],
+                },
+              ],
+            },
+            {
+              category: "Navegação",
+              tools: [
+                {
+                  name: "get_memory_tree",
+                  description: "Get memory tree structure",
+                  params: ["project_path", "context?", "depth?"],
+                },
+                {
+                  name: "get_filesystem_tree",
+                  description: "Get file system tree structure with file types",
+                  params: ["project_path"],
+                },
+              ],
+            },
+            {
+              category: "Estatísticas",
+              tools: [
+                {
+                  name: "stats",
+                  description: "Get system statistics",
+                  params: ["project_path"],
+                },
+              ],
+            },
+          ],
+          resources: [
+            {
+              name: "Main Memory",
+              uri: "memory://main",
+              description: "Current main memory configuration and contexts",
+            },
+            {
+              name: "Memory Tree",
+              uri: "memory://tree",
+              description:
+                "Hierarchical view of all memories organized by context",
+            },
+            {
+              name: "System Statistics",
+              uri: "memory://stats",
+              description: "System usage statistics and health metrics",
+            },
+          ],
+          usage_examples: {
+            create_memory: {
+              tool: "memory_create",
+              params: {
+                project_path: "/path/to/project",
+                context: "desenvolvimento",
+                subcontext: "frontend",
+                title: "Componentes React",
+                content: "# Componentes React\n\nDetalhes sobre componentes...",
+              },
+            },
+            search: {
+              tool: "search_memories",
+              params: {
+                project_path: "/path/to/project",
+                query: "react components",
+                options: { limit: 10 },
+              },
+            },
+          },
+        };
+        return {
+          content: [
+            { type: "text", text: JSON.stringify(helpContent, null, 2) },
           ],
         };
 

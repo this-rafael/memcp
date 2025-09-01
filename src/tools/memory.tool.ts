@@ -113,12 +113,45 @@ export class MemoryTools {
       } catch (listError) {
         // Ignore listing errors
       }
+      // Instead of simplesmente falhar, coletar todas as memórias disponíveis para ajudar o usuário
+      const availableMemories = await this.listAllMemories();
+      const errorMessage = `Failed to read memory: ${
+        error instanceof Error ? error.message : String(error)
+      } (Full path: ${fullPath})${debugInfo}`;
+      // Retornar objeto estruturado dentro de Memory.content para não quebrar contrato existente
+      return {
+        frontmatter: {
+          id: "error",
+          title: "Memory read failed",
+          context: "system",
+          subcontext: "diagnostics",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          tags: ["error", "diagnostics"],
+          importance: "low",
+        },
+        content: [
+          errorMessage,
+          "\n\nAvailable memories (relative paths):",
+          ...availableMemories.slice(0, 200), // limitar para evitar resposta gigante
+        ].join("\n"),
+      };
+    }
+  }
 
-      throw new Error(
-        `Failed to read memory: ${
-          error instanceof Error ? error.message : String(error)
-        } (Full path: ${fullPath})${debugInfo}`
+  /**
+   * Lista todas as memórias disponíveis retornando paths relativos.
+   */
+  private async listAllMemories(): Promise<string[]> {
+    const memoriesPath = path.join(this.memoryPath, "memories");
+    try {
+      const files = await FileSystemUtils.listFilesWithExtensions(
+        memoriesPath,
+        [".md", ".markdown"]
       );
+      return files.map((f) => path.relative(this.memoryPath, f));
+    } catch {
+      return [];
     }
   }
 
@@ -244,11 +277,18 @@ export class MemoryTools {
     try {
       return this.searchIndex.search(query, options);
     } catch (error) {
-      throw new Error(
-        `Failed to search memories: ${
+      // Em caso de falha, retornar estrutura vazia + lista de memórias disponíveis
+      const available = await this.listAllMemories();
+      return {
+        query,
+        total: 0,
+        results: [],
+        duration_ms: 0,
+        error: `Failed to search memories: ${
           error instanceof Error ? error.message : String(error)
-        }`
-      );
+        }`,
+        available_memories: available.slice(0, 500),
+      } as any; // manter compat mesmo que campo extra
     }
   }
 
