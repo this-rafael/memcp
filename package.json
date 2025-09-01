@@ -1,6 +1,6 @@
 {
   "name": "memcp",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "type": "module",
   "description": "MCP Server for hierarchical intelligent memory system with persistent, indexed and cached context",
   "main": "dist/index.js",
@@ -21,7 +21,15 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage"
   },
-  "keywords": ["mcp", "memory", "context", "ai", "cache", "indexing", "hierarchical"],
+  "keywords": [
+    "mcp",
+    "memory",
+    "context",
+    "ai",
+    "cache",
+    "indexing",
+    "hierarchical"
+  ],
   "author": "Rafael S Pereira",
   "license": "MIT",
   "dependencies": {
