@@ -4,9 +4,9 @@
  * Test script for Memory Organizer functionality
  */
 
-import { MemoryOrganizer, MultiPathMemoryOrganizer } from './dist/utils/memory-organizer.js';
-import path from 'path';
 import { promises as fs } from 'fs';
+import path from 'path';
+import { MemoryOrganizer, MultiPathMemoryOrganizer } from './dist/utils/memory-organizer.js';
 
 async function testSinglePathOrganizer() {
   console.log("🧪 Testing Single Path Memory Organizer\n");

@@ -1,12 +1,11 @@
-import { GeminiExecutor } from "../executors/gemini-executor.js";
-import { FileSystemUtils } from "./file-system.js";
-import { MainMemoryTools } from "../tools/main-memory.tool.js";
-import { LinksTools } from "../tools/links.tool.js";
-import { MemoryTools } from "../tools/memory.tool.js";
-import { SubmemoryTools } from "../tools/submemory.tool.js";
-import { NavigationTools } from "../tools/navigation.tool.js";
-import path from "path";
 import fs from "fs";
+import path from "path";
+import { GeminiExecutor } from "../executors/gemini-executor.js";
+import { LinksTools } from "../tools/links.tool.js";
+import { MainMemoryTools } from "../tools/main-memory.tool.js";
+import { MemoryTools } from "../tools/memory.tool.js";
+import { NavigationTools } from "../tools/navigation.tool.js";
+import { SubmemoryTools } from "../tools/submemory.tool.js";
 
 /**
  * MemoryOrganizer uses Gemini AI to automatically organize and optimize memory structure
@@ -27,7 +26,7 @@ export class MemoryOrganizer {
   constructor(projectPath: string) {
     this.projectPath = projectPath;
     this.gemini = GeminiExecutor.create();
-    
+
     // Initialize tool instances with memory path
     const memoryPath = path.join(projectPath, "ia-memory");
     this.mainMemory = new MainMemoryTools(memoryPath);
@@ -46,7 +45,9 @@ export class MemoryOrganizer {
       return;
     }
 
-    console.log(`🤖 Starting memory organizer for ${this.projectPath} (every ${intervalMinutes}min)`);
+    console.log(
+      `🤖 Starting memory organizer for ${this.projectPath} (every ${intervalMinutes}min)`
+    );
     this.isRunning = true;
 
     // Run immediately, then set interval
@@ -81,31 +82,42 @@ export class MemoryOrganizer {
    */
   private async runOrganization(): Promise<void> {
     try {
-      console.log(`🤖 [${new Date().toISOString()}] Running memory organization for ${this.projectPath}`);
-      
+      console.log(
+        `🤖 [${new Date().toISOString()}] Running memory organization for ${
+          this.projectPath
+        }`
+      );
+
       // Check if ia-memory directory exists
       const memoryPath = path.join(this.projectPath, "ia-memory");
       if (!fs.existsSync(memoryPath)) {
-        console.log(`🤖 No ia-memory directory found in ${this.projectPath}, skipping`);
+        console.log(
+          `🤖 No ia-memory directory found in ${this.projectPath}, skipping`
+        );
         return;
       }
 
       // 1. Analyze current memory structure
       const memoryAnalysis = await this.analyzeCurrentMemory();
-      
+
       // 2. Get available MCP functions
       const availableFunctions = this.getAvailableFunctions();
-      
+
       // 3. Generate organization recommendations using Gemini
-      const recommendations = await this.generateRecommendations(memoryAnalysis, availableFunctions);
-      
+      const recommendations = await this.generateRecommendations(
+        memoryAnalysis,
+        availableFunctions
+      );
+
       // 4. Execute approved recommendations (yolo mode)
       await this.executeRecommendations(recommendations);
-      
+
       console.log(`🤖 Memory organization completed for ${this.projectPath}`);
-      
     } catch (error) {
-      console.error(`🤖 Error in memory organization for ${this.projectPath}:`, error);
+      console.error(
+        `🤖 Error in memory organization for ${this.projectPath}:`,
+        error
+      );
     }
   }
 
@@ -123,13 +135,13 @@ export class MemoryOrganizer {
 
       // Get main memory
       const mainMemory = await this.mainMemory.memoryMainGet();
-      
+
       // Get memory tree
       const memoryTree = await this.navigation.getMemoryTree();
-      
+
       // Get system stats
       const stats = await this.navigation.getStats();
-      
+
       // Get existing links
       let allLinks = [];
       try {
@@ -152,7 +164,7 @@ export class MemoryOrganizer {
         memoryTree,
         stats,
         links: allLinks,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       console.error("Error analyzing memory:", error);
@@ -167,39 +179,42 @@ export class MemoryOrganizer {
     return [
       // Main Memory Tools
       "memory_main_get - Get main memory or specific section",
-      "memory_main_update - Update main memory section", 
+      "memory_main_update - Update main memory section",
       "memory_main_add_context - Add new context to main memory",
-      
+
       // Memory Tools
       "memory_create - Create a new memory entry",
       "memory_read - Read memory by path",
-      
+
       // Links Tools
       "links_create - Create new link between memories",
       "links_read - Read links for context/subcontext",
-      
+
       // Submemory Tools
       "submemory_create - Create new submemory",
       "submemory_read - Read submemory content",
       "submemory_update - Update submemory content",
       "submemory_delete - Delete submemory",
-      
+
       // Navigation Tools
       "get_memory_tree - Get memory tree structure",
       "get_filesystem_tree - Get file system tree",
       "search_memories - Full-text search across memories",
       "stats - Get system statistics",
-      
+
       // Maintenance Tools
       "validate_system - Validate system integrity",
-      "heartbeat_status - Get heartbeat monitor status"
+      "heartbeat_status - Get heartbeat monitor status",
     ];
   }
 
   /**
    * Generate organization recommendations using Gemini AI
    */
-  private async generateRecommendations(memoryAnalysis: any, availableFunctions: string[]): Promise<any> {
+  private async generateRecommendations(
+    memoryAnalysis: any,
+    availableFunctions: string[]
+  ): Promise<any> {
     const prompt = `
 🤖 **MEMORY ORGANIZER AGENT - YOLO MODE** 🤖
 
@@ -213,7 +228,7 @@ ${JSON.stringify(memoryAnalysis, null, 2)}
 
 ## 🛠️ FUNÇÕES DISPONÍVEIS
 
-${availableFunctions.map(func => `- ${func}`).join('\n')}
+${availableFunctions.map((func) => `- ${func}`).join("\n")}
 
 ## 🎯 OBJETIVOS DE ORGANIZAÇÃO
 
@@ -298,19 +313,18 @@ Analise e organize! 🚀
         prompt,
         300 // 5 minutos para análise completa
       );
-      
+
       // Extract JSON from response
       const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[1]);
       }
-      
+
       // Try to parse the entire response as JSON
       return JSON.parse(response);
-      
     } catch (error) {
       console.error("Error generating recommendations:", error);
-      
+
       // Fallback: create simple recommendations based on analysis
       return this.createFallbackRecommendations(memoryAnalysis);
     }
@@ -321,60 +335,67 @@ Analise e organize! 🚀
    */
   private createFallbackRecommendations(memoryAnalysis: any): any {
     const recommendations = [];
-    
+
     try {
       // Basic analysis
       if (memoryAnalysis && memoryAnalysis.stats) {
         const stats = memoryAnalysis.stats;
-        
+
         // Recommend creating links if there are many memories but no links
-        if (stats.total_memories > 5 && (!memoryAnalysis.links || memoryAnalysis.links.length === 0)) {
+        if (
+          stats.total_memories > 5 &&
+          (!memoryAnalysis.links || memoryAnalysis.links.length === 0)
+        ) {
           recommendations.push({
             type: "create_memory",
             priority: "medium",
-            description: "Criar memória organizacional para estabelecer conexões entre conceitos relacionados",
+            description:
+              "Criar memória organizacional para estabelecer conexões entre conceitos relacionados",
             action: {
               function: "memory_create",
               params: {
                 context: "general",
                 subcontext: "organization",
                 title: "Mapa de Conexões do Projeto",
-                content: "Esta memória serve como um índice organizacional para facilitar a navegação entre os diferentes conceitos e módulos do projeto. Links e relacionamentos serão estabelecidos gradualmente.",
+                content:
+                  "Esta memória serve como um índice organizacional para facilitar a navegação entre os diferentes conceitos e módulos do projeto. Links e relacionamentos serão estabelecidos gradualmente.",
                 importance: "medium",
-                tags: ["organização", "índice", "navegação"]
-              }
-            }
+                tags: ["organização", "índice", "navegação"],
+              },
+            },
           });
         }
-        
+
         // Recommend organizing contexts if there are too many
         if (stats.total_contexts > 8) {
           recommendations.push({
             type: "create_context",
             priority: "low",
-            description: "Criar contexto para consolidar informações fragmentadas",
+            description:
+              "Criar contexto para consolidar informações fragmentadas",
             action: {
               function: "memory_main_add_context",
               params: {
                 name: "consolidation",
-                description: "Contexto para consolidar e organizar informações que estão espalhadas em múltiplos contextos",
-                priority: 6
-              }
-            }
+                description:
+                  "Contexto para consolidar e organizar informações que estão espalhadas em múltiplos contextos",
+                priority: 6,
+              },
+            },
           });
         }
       }
     } catch (error) {
       console.error("Error creating fallback recommendations:", error);
     }
-    
+
     return {
       analysis: {
         currentState: "Análise automática básica - Gemini indisponível",
         issues: ["Sistema Gemini não respondeu no tempo esperado"],
-        opportunities: ["Aplicar organização básica baseada em heurísticas"]
+        opportunities: ["Aplicar organização básica baseada em heurísticas"],
       },
-      recommendations
+      recommendations,
     };
   }
 
@@ -387,21 +408,31 @@ Analise e organize! 🚀
       return;
     }
 
-    console.log(`🤖 Executing ${recommendations.recommendations.length} recommendations in YOLO mode`);
-    
+    console.log(
+      `🤖 Executing ${recommendations.recommendations.length} recommendations in YOLO mode`
+    );
+
     // Sort by priority (high -> medium -> low)
-    const sortedRecommendations = recommendations.recommendations.sort((a: any, b: any) => {
-      const priorityOrder: Record<string, number> = { high: 3, medium: 2, low: 1 };
-      return (priorityOrder[b.priority] || 1) - (priorityOrder[a.priority] || 1);
-    });
+    const sortedRecommendations = recommendations.recommendations.sort(
+      (a: any, b: any) => {
+        const priorityOrder: Record<string, number> = {
+          high: 3,
+          medium: 2,
+          low: 1,
+        };
+        return (
+          (priorityOrder[b.priority] || 1) - (priorityOrder[a.priority] || 1)
+        );
+      }
+    );
 
     for (const recommendation of sortedRecommendations) {
       try {
         console.log(`🤖 Executing: ${recommendation.description}`);
-        
+
         const action = recommendation.action;
         const params = { project_path: this.projectPath, ...action.params };
-        
+
         switch (action.function) {
           case "links_create":
             await this.links.linksCreate(
@@ -411,7 +442,7 @@ Analise e organize! 🚀
               params.memory_path
             );
             break;
-            
+
           case "memory_main_add_context":
             await this.mainMemory.memoryMainAddContext(
               params.name,
@@ -419,7 +450,7 @@ Analise e organize! 🚀
               params.priority
             );
             break;
-            
+
           case "memory_create":
             await this.memory.memoryCreate(
               params.context,
@@ -430,7 +461,7 @@ Analise e organize! 🚀
               params.tags
             );
             break;
-            
+
           case "submemory_create":
             await this.submemory.submemoryCreate(
               params.context,
@@ -438,15 +469,17 @@ Analise e organize! 🚀
               params.content
             );
             break;
-            
+
           default:
             console.log(`🤖 Unknown function: ${action.function}`);
         }
-        
+
         console.log(`✅ Executed: ${recommendation.description}`);
-        
       } catch (error) {
-        console.error(`❌ Failed to execute: ${recommendation.description}`, error);
+        console.error(
+          `❌ Failed to execute: ${recommendation.description}`,
+          error
+        );
       }
     }
   }
@@ -475,7 +508,9 @@ export class MultiPathMemoryOrganizer {
       return;
     }
 
-    console.log(`🤖 Starting memory organizer for ${projectPaths.length} projects`);
+    console.log(
+      `🤖 Starting memory organizer for ${projectPaths.length} projects`
+    );
     this.isRunning = true;
 
     for (const projectPath of projectPaths) {
@@ -490,11 +525,11 @@ export class MultiPathMemoryOrganizer {
    */
   stop(): void {
     console.log("🤖 Stopping all memory organizers");
-    
+
     for (const organizer of this.organizers.values()) {
       organizer.stop();
     }
-    
+
     this.organizers.clear();
     this.isRunning = false;
   }
@@ -505,7 +540,7 @@ export class MultiPathMemoryOrganizer {
   getStatus(): { path: string; active: boolean }[] {
     return Array.from(this.organizers.entries()).map(([path, organizer]) => ({
       path,
-      active: organizer.isActive()
+      active: organizer.isActive(),
     }));
   }
 

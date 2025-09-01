@@ -97,7 +97,10 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
       // Iniciar organizador de memória se habilitado
       if (this.memoryOrganizer && this.options.memoryOrganizerEnabled) {
         console.error("🤖 Starting memory organizer with YOLO mode");
-        this.memoryOrganizer.start(this.options.paths, this.options.memoryOrganizerInterval);
+        this.memoryOrganizer.start(
+          this.options.paths,
+          this.options.memoryOrganizerInterval
+        );
       }
 
       this.emit("started");
@@ -301,6 +304,8 @@ export function createHeartbeatFromEnv(): MultiPathHeartbeatMonitor {
     interval: parseInt(process.env.MCP_HEARTBEAT_INTERVAL || "10"),
     enabled: process.env.MCP_HEARTBEAT !== "false",
     memoryOrganizerEnabled: process.env.MCP_MEMORY_ORGANIZER !== "false",
-    memoryOrganizerInterval: parseInt(process.env.MCP_MEMORY_ORGANIZER_INTERVAL || "1")
+    memoryOrganizerInterval: parseInt(
+      process.env.MCP_MEMORY_ORGANIZER_INTERVAL || "1"
+    ),
   });
 }

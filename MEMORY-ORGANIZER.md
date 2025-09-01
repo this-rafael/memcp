@@ -7,6 +7,7 @@ O Memory Organizer é um sistema inteligente que roda em paralelo ao heartbeat m
 ## 🚀 Funcionalidades Implementadas
 
 ### ✅ Sistema Base
+
 - **Análise automática** de estrutura de memória
 - **Integração com Gemini AI** para análise inteligente
 - **Modo YOLO** para ações automáticas e agressivas
@@ -15,6 +16,7 @@ O Memory Organizer é um sistema inteligente que roda em paralelo ao heartbeat m
 - **Execução em background** a cada 1 minuto (configurável)
 
 ### ✅ Análise Inteligente
+
 - Detecção de padrões de organização
 - Identificação de contextos fragmentados
 - Análise de densidade de informações
@@ -22,6 +24,7 @@ O Memory Organizer é um sistema inteligente que roda em paralelo ao heartbeat m
 - Verificação de consistência estrutural
 
 ### ✅ Ações Automáticas
+
 - **Criação de links** entre memórias relacionadas
 - **Organização de contextos** similares
 - **Criação de memórias organizacionais** como índices
@@ -31,6 +34,7 @@ O Memory Organizer é um sistema inteligente que roda em paralelo ao heartbeat m
 ## 🎯 Como Usar
 
 ### Comando Básico
+
 ```bash
 # Iniciar com organizador ativo
 memcp --yolo
@@ -43,6 +47,7 @@ memcp --no-memory-organizer
 ```
 
 ### Configuração Avançada
+
 ```bash
 # Intervalo customizado (em minutos)
 memcp --memory-organizer 0.5  # A cada 30 segundos
@@ -58,11 +63,13 @@ memcp
 ### Componentes Principais
 
 1. **MemoryOrganizer** (Single-path)
+
    - Analisa um projeto específico
    - Executa ciclos de organização
    - Integra com ferramentas MCP
 
 2. **MultiPathMemoryOrganizer** (Multi-path)
+
    - Gerencia múltiplos MemoryOrganizers
    - Coordena execução paralela
    - Status consolidado
@@ -90,7 +97,7 @@ memcp
                                    │
 ┌─ Ferramentas MCP ─────────────────┘
 │  ├─ MainMemoryTools
-│  ├─ LinksTools  
+│  ├─ LinksTools
 │  ├─ MemoryTools
 │  ├─ SubmemoryTools
 │  └─ NavigationTools
@@ -100,6 +107,7 @@ memcp
 ## 📊 Exemplo de Análise Real
 
 ### Input: Projeto com 11 contextos
+
 ```json
 {
   "contexts": {
@@ -112,6 +120,7 @@ memcp
 ```
 
 ### Output: Recomendações YOLO
+
 ```json
 {
   "analysis": {
@@ -141,17 +150,20 @@ memcp
 ## 🎛️ Configurações Disponíveis
 
 ### Flags de Comando
+
 - `--yolo, -y`: Ativa modo agressivo
-- `--memory-organizer <min>`: Intervalo em minutos  
+- `--memory-organizer <min>`: Intervalo em minutos
 - `--no-memory-organizer`: Desabilita completamente
 
 ### Variáveis de Ambiente
+
 - `MCP_MEMORY_ORGANIZER`: true/false
 - `MCP_MEMORY_ORGANIZER_INTERVAL`: minutos
 - `MCP_YOLO_MODE`: true/false
 - `MCP_MONITORING_PATHS`: paths separados por vírgula
 
 ### Integração com Heartbeat
+
 - Ativação automática com multi-path monitor
 - Compartilha configurações de path
 - Shutdown coordenado
@@ -160,6 +172,7 @@ memcp
 ## 📈 Performance e Monitoramento
 
 ### Logs em Tempo Real
+
 ```
 🤖 Starting memory organizer for 2 projects
 🤖 [2025-09-01T12:20:17.306Z] Running memory organization for /project1
@@ -169,6 +182,7 @@ memcp
 ```
 
 ### Status e Debugging
+
 - PID tracking de cada organizador
 - Timestamps de todas as operações
 - Contadores de recomendações executadas
@@ -177,18 +191,21 @@ memcp
 ## 🔒 Modo YOLO - Precauções
 
 ### O que o YOLO faz automaticamente:
+
 - ✅ Cria links entre memórias relacionadas
 - ✅ Adiciona contextos organizacionais
 - ✅ Cria memórias índice para navegação
 - ✅ Sugere consolidações estruturais
 
 ### O que o YOLO NÃO faz:
+
 - ❌ Não deleta memórias existentes
 - ❌ Não modifica conteúdo de memórias
 - ❌ Não altera configurações principais
 - ❌ Não sobrescreve dados críticos
 
 ### Sistema de Segurança:
+
 - Fallback para heurísticas quando IA falha
 - Timeout de 5 minutos para análises
 - Limitação de 5-8 ações por ciclo
@@ -197,24 +214,28 @@ memcp
 ## 🎯 Casos de Uso
 
 ### 1. Desenvolvimento Ativo
+
 ```bash
 # Monitoramento rápido durante desenvolvimento
 memcp --yolo --memory-organizer 0.5 --heartbeat 2
 ```
 
 ### 2. Projetos em Produção
+
 ```bash
 # Organização suave, sem interferir no trabalho
 memcp --yolo --memory-organizer 5 --heartbeat 30
 ```
 
 ### 3. Múltiplos Projetos
+
 ```bash
 # Gerenciamento de portfolio de projetos
 memcp --paths "/proj1,/proj2,/proj3" --yolo --memory-organizer 2
 ```
 
 ### 4. Análise e Relatórios
+
 ```bash
 # Demo e testing
 node demo-memory-organizer.mjs
@@ -235,8 +256,9 @@ O Memory Organizer fornece:
 ### Status: ✅ COMPLETAMENTE IMPLEMENTADO E TESTADO
 
 O sistema está pronto para uso em produção com todos os recursos solicitados:
+
 - ✅ Execução paralela ao heartbeat
-- ✅ Intervalo de 1 minuto (configurável) 
+- ✅ Intervalo de 1 minuto (configurável)
 - ✅ Modo YOLO com flag -y
 - ✅ Integração com Gemini Executor
 - ✅ Organização inteligente de memória
