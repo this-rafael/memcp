@@ -16,6 +16,7 @@ import { MemoryTools } from "./tools/memory.tool.js";
 import { NavigationTools } from "./tools/navigation.tool.js";
 import { SubmemoryTools } from "./tools/submemory.tool.js";
 import { FileSystemUtils } from "./utils/file-system.js";
+import { HeartbeatMonitor } from "./utils/heartbeat-monitor.js";
 
 import { ToolParams } from "./types.js";
 
@@ -23,6 +24,9 @@ const server = new Server(
   { name: "memory-mcp", version: "1.0.0" },
   { capabilities: { tools: {}, resources: {} } }
 );
+
+// Heartbeat monitor instance
+let heartbeatMonitor: HeartbeatMonitor | null = null;
 
 // Tool instances - will be initialized per project
 let currentProjectPath: string | null = null;
@@ -319,6 +323,25 @@ const TOOLS = [
       required: ["project_path"],
     },
   },
+  {
+    name: "heartbeat_status",
+    description: "Get heartbeat monitor status and recent entries",
+    inputSchema: {
+      type: "object",
+      properties: {
+        project_path: {
+          type: "string",
+          description: "Path to the project directory",
+        },
+        lines: {
+          type: "number",
+          description:
+            "Number of recent heartbeat entries to retrieve (default: 10)",
+        },
+      },
+      required: ["project_path"],
+    },
+  },
 ];
 
 // Register tools
@@ -499,6 +522,49 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             { type: "text", text: JSON.stringify(systemStats, null, 2) },
           ],
         };
+
+      case "heartbeat_status":
+        const lines = params.lines || 10;
+        try {
+          // Create temporary heartbeat monitor to read status
+          const tempHeartbeat = new HeartbeatMonitor({
+            projectPath: params.project_path,
+            enabled: false, // Don't start monitoring, just read
+          });
+
+          const recentEntries = await tempHeartbeat.getRecentHeartbeats(lines);
+          const status = tempHeartbeat.getStatus();
+
+          const heartbeatStatus = {
+            monitor: heartbeatMonitor
+              ? heartbeatMonitor.getStatus()
+              : { isRunning: false },
+            recent_entries: recentEntries,
+            file_status: status,
+          };
+
+          return {
+            content: [
+              { type: "text", text: JSON.stringify(heartbeatStatus, null, 2) },
+            ],
+          };
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(
+                  {
+                    error:
+                      error instanceof Error ? error.message : String(error),
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+          };
+        }
 
       case "help":
         const helpContent = {
@@ -790,10 +856,65 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+
+  // Inicializar heartbeat monitor se habilitado
+  const heartbeatEnabled = process.env.MCP_HEARTBEAT !== "false";
+  if (heartbeatEnabled) {
+    const projectPath = process.env.MEMORY_PROJECT_PATH || process.cwd();
+    const heartbeatInterval = parseInt(
+      process.env.MCP_HEARTBEAT_INTERVAL || "10"
+    );
+
+    heartbeatMonitor = new HeartbeatMonitor({
+      projectPath,
+      interval: heartbeatInterval,
+      enabled: true,
+    });
+
+    // Configurar eventos do heartbeat
+    heartbeatMonitor.on("started", () => {
+      console.error(
+        `Heartbeat monitor started - interval: ${heartbeatInterval}s`
+      );
+    });
+
+    heartbeatMonitor.on("error", (error) => {
+      console.error("Heartbeat monitor error:", error);
+    });
+
+    // Iniciar monitoring
+    try {
+      await heartbeatMonitor.start();
+    } catch (error) {
+      console.error("Failed to start heartbeat monitor:", error);
+    }
+  }
+
   console.error("Memory MCP server running on stdio");
+  console.error(`Process ID: ${process.pid}`);
+  console.error(
+    `Heartbeat monitoring: ${heartbeatEnabled ? "ENABLED" : "DISABLED"}`
+  );
 }
 
 main().catch((error) => {
   console.error("Failed to start server:", error);
   process.exit(1);
+});
+
+// Graceful shutdown
+process.on("SIGTERM", async () => {
+  console.error("Received SIGTERM, shutting down gracefully...");
+  if (heartbeatMonitor) {
+    await heartbeatMonitor.stop();
+  }
+  process.exit(0);
+});
+
+process.on("SIGINT", async () => {
+  console.error("Received SIGINT, shutting down gracefully...");
+  if (heartbeatMonitor) {
+    await heartbeatMonitor.stop();
+  }
+  process.exit(0);
 });
