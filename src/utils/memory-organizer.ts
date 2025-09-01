@@ -149,6 +149,17 @@ export class MemoryOrganizer {
         return;
       }
 
+      // Check if we ran recently (prevent spam)
+      const lastRunFile = path.join(memoryPath, ".last-organization");
+      if (fs.existsSync(lastRunFile)) {
+        const lastRun = new Date(fs.readFileSync(lastRunFile, 'utf8'));
+        const timeSinceLastRun = Date.now() - lastRun.getTime();
+        if (timeSinceLastRun < 5 * 60 * 1000) { // 5 minutes minimum
+          await this.logger.info("Organization skipped - ran recently");
+          return;
+        }
+      }
+
       // 1. Analyze current memory structure
       const memoryAnalysis = await this.analyzeCurrentMemory();
 
@@ -163,6 +174,9 @@ export class MemoryOrganizer {
 
       // 4. Execute approved recommendations (yolo mode)
       await this.executeRecommendations(recommendations);
+
+      // Update last run timestamp
+      fs.writeFileSync(lastRunFile, new Date().toISOString());
 
       await this.logger.info(
         `Memory organization completed for ${this.projectPath}`
@@ -364,7 +378,7 @@ Analise e organize! 🚀
       const response = await this.gemini.execute(
         "Analise a estrutura de memória e gere recomendações de organização",
         prompt,
-        300 // 5 minutos para análise completa
+        30 // 30 seconds timeout instead of 300
       );
 
       // Extract JSON from response

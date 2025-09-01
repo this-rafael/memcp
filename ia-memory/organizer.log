@@ -1,0 +1,1468 @@
+2025-09-01T17:56:58.460Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T17:56:58.460Z [INFO] Starting memory organizer for /home/wisiex/projects/memcp (every 1min)
+2025-09-01T17:56:58.461Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T17:57:58.468Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T17:57:58.469Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T17:58:58.478Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T17:58:58.478Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T17:59:58.488Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T17:59:58.488Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T18:00:58.498Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T18:00:58.498Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T18:01:58.475Z [ERROR] Error generating recommendations: Error: Command 'gemini -p '
+> You are a senior analytical critic, specialized in evaluating technical work based on **evidence, standards, and logic**. Your goal is to review a generated artifact (code, diagram, documentation, process, architecture, etc.) and produce a highly detailed, well-founded, and actionable technical-critical report. You must not modify any artifact; instead, write a response that analyzes the artifact against the established criteria.
+
+---
+
+### **INPUTS**
+
+1. **📄 Request Text** — a detailed description of what should have been produced (explicit and implicit requirements).
+2. **📦 Generated Result** — the artifact to be evaluated.
+
+---
+
+### **THINKING AND ACTION MODE**
+
+1. **Criteria Extraction**
+
+	- Identify **all explicit criteria** (what was clearly requested).
+	- Detect **implicit criteria** (best practices and expected quality standards even if not mentioned).
+	- Map **priorities** (what is essential vs. what is optional).
+
+2. **Contextual Analysis**
+
+	- Check **coherence between the artifact and its context of use**.
+	- Assess **the suitability of the approach** to the proposed problem.
+	- Consider **technical trade-offs** (e.g., performance vs. readability, simplicity vs. extensibility).
+
+3. **Structured Evaluation**
+
+	- **Requirement Coverage** → does it fully meet the request?
+	- **Logical Consistency** → are there contradictions, inconsistencies, or gaps?
+	- **Technical Quality** → clarity, readability, correct use of patterns.
+	- **Standards and Best Practices** → does it follow accepted conventions for the domain?
+	- **Scalability and Maintainability** → is it sustainable in the long term?
+
+4. **Issue Identification**
+
+	- Categorize by **severity**:
+
+	  - 🚨 **Critical** → severe violations or issues that make usage unfeasible.
+	  - ⚠️ **Important** → problems that compromise quality/maintainability.
+	  - ℹ️ **Note** → minor adjustments or refinement suggestions.
+
+	- Always cite **concrete evidence** from the artifact to support the critique.
+
+5. **Actionable Recommendations**
+
+	- Provide **clear and feasible suggestions** for each issue.
+	- Explain **why** the change is necessary and **how** it improves the outcome.
+	- If there are multiple solutions, present pros and cons.
+
+6. **Continuous Improvement View**
+
+	- Point out **opportunities for evolution** beyond the requested scope.
+	- Identify recurring patterns that indicate systemic issues.
+
+---
+
+### **OUTPUT FORMAT**
+
+```
+📋 Overall Assessment
+Objective summary of how well the result meets the request, highlighting high-level strengths and weaknesses.
+
+✅ Strengths
+- [Positive point] + justification.
+- [Positive point] + justification.
+
+⚠️ Issues Found
+1. [Severity] Problem description + artifact evidence + violated criterion.
+2. [Severity] ...
+
+💡 Recommendations
+- [Recommendation] + explanation + expected impact.
+- [Alternative/option] with trade-offs.
+
+📈 Evolution Notes
+Suggestions for future improvements aligned with excellence standards.
+```
+
+---
+
+### **ESSENTIAL RULES**
+
+- Always cite concrete examples from the artifact.
+- Do not soften critical issues.
+- Keep a constructive but direct tone.
+- Avoid jargon without explanation.
+- Question omissions and inconsistencies even if they are not in the original scope.
+- Assume the requester expects **clarity, assertiveness, and depth**.
+
+**📄 Original Request:**
+Analise a estrutura de memória e gere recomendações de organização
+
+**📦 Generated Response:**
+
+🤖 **MEMORY ORGANIZER AGENT - YOLO MODE** 🤖
+
+Você é um agente especializado em organização inteligente de sistemas de memória MCP. Sua missão é analisar a estrutura atual e propor melhorias automáticas para otimizar a organização, criar links úteis e melhorar a usabilidade.
+
+## 📊 ANÁLISE ATUAL DA MEMÓRIA
+
+```json
+{
+  "error": "Main memory not loaded"
+}
+```
+
+## 🛠️ FUNÇÕES DISPONÍVEIS
+
+- memory_main_get - Get main memory or specific section
+- memory_main_update - Update main memory section
+- memory_main_add_context - Add new context to main memory
+- memory_create - Create a new memory entry
+- memory_read - Read memory by path
+- links_create - Create new link between memories
+- links_read - Read links for context/subcontext
+- submemory_create - Create new submemory
+- submemory_read - Read submemory content
+- submemory_update - Update submemory content
+- submemory_delete - Delete submemory
+- get_memory_tree - Get memory tree structure
+- get_filesystem_tree - Get file system tree
+- search_memories - Full-text search across memories
+- stats - Get system statistics
+- validate_system - Validate system integrity
+- heartbeat_status - Get heartbeat monitor status
+
+## 🎯 OBJETIVOS DE ORGANIZAÇÃO
+
+1. **Criar Links Inteligentes**: Identificar memórias relacionadas e criar conexões lógicas
+2. **Otimizar Estrutura de Contextos**: Reorganizar contextos para melhor navegação
+3. **Melhorar Submemórias**: Agrupar informações relacionadas em submemórias coerentes
+4. **Limpar Redundâncias**: Identificar e consolidar informações duplicadas
+5. **Estabelecer Hierarquias**: Criar estruturas hierárquicas lógicas
+
+## 📋 FORMATO DE RESPOSTA
+
+Responda APENAS com um JSON válido seguindo este formato:
+
+```json
+{
+  "analysis": {
+    "currentState": "Breve descrição do estado atual",
+    "issues": ["Problema 1", "Problema 2"],
+    "opportunities": ["Oportunidade 1", "Oportunidade 2"]
+  },
+  "recommendations": [
+    {
+      "type": "create_link",
+      "priority": "high|medium|low", 
+      "description": "Descrição da ação",
+      "action": {
+        "function": "links_create",
+        "params": {
+          "context": "nome_contexto",
+          "subcontext": "nome_subcontexto", 
+          "description": "Descrição do link",
+          "memory_path": "caminho/para/memoria"
+        }
+      }
+    },
+    {
+      "type": "create_context",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação", 
+      "action": {
+        "function": "memory_main_add_context",
+        "params": {
+          "name": "novo_contexto",
+          "description": "Descrição do contexto",
+          "priority": 5
+        }
+      }
+    },
+    {
+      "type": "create_memory",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação",
+      "action": {
+        "function": "memory_create", 
+        "params": {
+          "context": "contexto",
+          "subcontext": "subcontexto",
+          "title": "Título da memória",
+          "content": "Conteúdo organizacional",
+          "importance": "medium",
+          "tags": ["organização", "automático"]
+        }
+      }
+    }
+  ]
+}
+```
+
+## ⚡ MODO YOLO ATIVADO
+
+- Seja PROATIVO: Sugira melhorias mesmo sem solicitação explícita
+- Seja INTELIGENTE: Use padrões e heurísticas para identificar oportunidades
+- Seja ÚTIL: Foque em ações que realmente melhorem a organização
+- Limite-se a 5-8 recomendações por execução para não sobrecarregar
+
+Analise e organize! 🚀
+    
+	 '' timed out after 300 seconds
+2025-09-01T18:01:58.475Z [INFO] 🤖 Executing 0 recommendations in YOLO mode
+2025-09-01T18:01:58.476Z [INFO] Memory organization completed for /home/wisiex/projects/memcp
+2025-09-01T18:01:58.498Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T18:01:58.499Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T18:02:58.474Z [ERROR] Error generating recommendations: Error: Command 'gemini -p '
+> You are a senior analytical critic, specialized in evaluating technical work based on **evidence, standards, and logic**. Your goal is to review a generated artifact (code, diagram, documentation, process, architecture, etc.) and produce a highly detailed, well-founded, and actionable technical-critical report. You must not modify any artifact; instead, write a response that analyzes the artifact against the established criteria.
+
+---
+
+### **INPUTS**
+
+1. **📄 Request Text** — a detailed description of what should have been produced (explicit and implicit requirements).
+2. **📦 Generated Result** — the artifact to be evaluated.
+
+---
+
+### **THINKING AND ACTION MODE**
+
+1. **Criteria Extraction**
+
+	- Identify **all explicit criteria** (what was clearly requested).
+	- Detect **implicit criteria** (best practices and expected quality standards even if not mentioned).
+	- Map **priorities** (what is essential vs. what is optional).
+
+2. **Contextual Analysis**
+
+	- Check **coherence between the artifact and its context of use**.
+	- Assess **the suitability of the approach** to the proposed problem.
+	- Consider **technical trade-offs** (e.g., performance vs. readability, simplicity vs. extensibility).
+
+3. **Structured Evaluation**
+
+	- **Requirement Coverage** → does it fully meet the request?
+	- **Logical Consistency** → are there contradictions, inconsistencies, or gaps?
+	- **Technical Quality** → clarity, readability, correct use of patterns.
+	- **Standards and Best Practices** → does it follow accepted conventions for the domain?
+	- **Scalability and Maintainability** → is it sustainable in the long term?
+
+4. **Issue Identification**
+
+	- Categorize by **severity**:
+
+	  - 🚨 **Critical** → severe violations or issues that make usage unfeasible.
+	  - ⚠️ **Important** → problems that compromise quality/maintainability.
+	  - ℹ️ **Note** → minor adjustments or refinement suggestions.
+
+	- Always cite **concrete evidence** from the artifact to support the critique.
+
+5. **Actionable Recommendations**
+
+	- Provide **clear and feasible suggestions** for each issue.
+	- Explain **why** the change is necessary and **how** it improves the outcome.
+	- If there are multiple solutions, present pros and cons.
+
+6. **Continuous Improvement View**
+
+	- Point out **opportunities for evolution** beyond the requested scope.
+	- Identify recurring patterns that indicate systemic issues.
+
+---
+
+### **OUTPUT FORMAT**
+
+```
+📋 Overall Assessment
+Objective summary of how well the result meets the request, highlighting high-level strengths and weaknesses.
+
+✅ Strengths
+- [Positive point] + justification.
+- [Positive point] + justification.
+
+⚠️ Issues Found
+1. [Severity] Problem description + artifact evidence + violated criterion.
+2. [Severity] ...
+
+💡 Recommendations
+- [Recommendation] + explanation + expected impact.
+- [Alternative/option] with trade-offs.
+
+📈 Evolution Notes
+Suggestions for future improvements aligned with excellence standards.
+```
+
+---
+
+### **ESSENTIAL RULES**
+
+- Always cite concrete examples from the artifact.
+- Do not soften critical issues.
+- Keep a constructive but direct tone.
+- Avoid jargon without explanation.
+- Question omissions and inconsistencies even if they are not in the original scope.
+- Assume the requester expects **clarity, assertiveness, and depth**.
+
+**📄 Original Request:**
+Analise a estrutura de memória e gere recomendações de organização
+
+**📦 Generated Response:**
+
+🤖 **MEMORY ORGANIZER AGENT - YOLO MODE** 🤖
+
+Você é um agente especializado em organização inteligente de sistemas de memória MCP. Sua missão é analisar a estrutura atual e propor melhorias automáticas para otimizar a organização, criar links úteis e melhorar a usabilidade.
+
+## 📊 ANÁLISE ATUAL DA MEMÓRIA
+
+```json
+{
+  "error": "Main memory not loaded"
+}
+```
+
+## 🛠️ FUNÇÕES DISPONÍVEIS
+
+- memory_main_get - Get main memory or specific section
+- memory_main_update - Update main memory section
+- memory_main_add_context - Add new context to main memory
+- memory_create - Create a new memory entry
+- memory_read - Read memory by path
+- links_create - Create new link between memories
+- links_read - Read links for context/subcontext
+- submemory_create - Create new submemory
+- submemory_read - Read submemory content
+- submemory_update - Update submemory content
+- submemory_delete - Delete submemory
+- get_memory_tree - Get memory tree structure
+- get_filesystem_tree - Get file system tree
+- search_memories - Full-text search across memories
+- stats - Get system statistics
+- validate_system - Validate system integrity
+- heartbeat_status - Get heartbeat monitor status
+
+## 🎯 OBJETIVOS DE ORGANIZAÇÃO
+
+1. **Criar Links Inteligentes**: Identificar memórias relacionadas e criar conexões lógicas
+2. **Otimizar Estrutura de Contextos**: Reorganizar contextos para melhor navegação
+3. **Melhorar Submemórias**: Agrupar informações relacionadas em submemórias coerentes
+4. **Limpar Redundâncias**: Identificar e consolidar informações duplicadas
+5. **Estabelecer Hierarquias**: Criar estruturas hierárquicas lógicas
+
+## 📋 FORMATO DE RESPOSTA
+
+Responda APENAS com um JSON válido seguindo este formato:
+
+```json
+{
+  "analysis": {
+    "currentState": "Breve descrição do estado atual",
+    "issues": ["Problema 1", "Problema 2"],
+    "opportunities": ["Oportunidade 1", "Oportunidade 2"]
+  },
+  "recommendations": [
+    {
+      "type": "create_link",
+      "priority": "high|medium|low", 
+      "description": "Descrição da ação",
+      "action": {
+        "function": "links_create",
+        "params": {
+          "context": "nome_contexto",
+          "subcontext": "nome_subcontexto", 
+          "description": "Descrição do link",
+          "memory_path": "caminho/para/memoria"
+        }
+      }
+    },
+    {
+      "type": "create_context",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação", 
+      "action": {
+        "function": "memory_main_add_context",
+        "params": {
+          "name": "novo_contexto",
+          "description": "Descrição do contexto",
+          "priority": 5
+        }
+      }
+    },
+    {
+      "type": "create_memory",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação",
+      "action": {
+        "function": "memory_create", 
+        "params": {
+          "context": "contexto",
+          "subcontext": "subcontexto",
+          "title": "Título da memória",
+          "content": "Conteúdo organizacional",
+          "importance": "medium",
+          "tags": ["organização", "automático"]
+        }
+      }
+    }
+  ]
+}
+```
+
+## ⚡ MODO YOLO ATIVADO
+
+- Seja PROATIVO: Sugira melhorias mesmo sem solicitação explícita
+- Seja INTELIGENTE: Use padrões e heurísticas para identificar oportunidades
+- Seja ÚTIL: Foque em ações que realmente melhorem a organização
+- Limite-se a 5-8 recomendações por execução para não sobrecarregar
+
+Analise e organize! 🚀
+    
+	 '' timed out after 300 seconds
+2025-09-01T18:02:58.475Z [INFO] 🤖 Executing 0 recommendations in YOLO mode
+2025-09-01T18:02:58.475Z [INFO] Memory organization completed for /home/wisiex/projects/memcp
+2025-09-01T18:02:58.499Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T18:02:58.499Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T18:03:58.490Z [ERROR] Error generating recommendations: Error: Command 'gemini -p '
+> You are a senior analytical critic, specialized in evaluating technical work based on **evidence, standards, and logic**. Your goal is to review a generated artifact (code, diagram, documentation, process, architecture, etc.) and produce a highly detailed, well-founded, and actionable technical-critical report. You must not modify any artifact; instead, write a response that analyzes the artifact against the established criteria.
+
+---
+
+### **INPUTS**
+
+1. **📄 Request Text** — a detailed description of what should have been produced (explicit and implicit requirements).
+2. **📦 Generated Result** — the artifact to be evaluated.
+
+---
+
+### **THINKING AND ACTION MODE**
+
+1. **Criteria Extraction**
+
+	- Identify **all explicit criteria** (what was clearly requested).
+	- Detect **implicit criteria** (best practices and expected quality standards even if not mentioned).
+	- Map **priorities** (what is essential vs. what is optional).
+
+2. **Contextual Analysis**
+
+	- Check **coherence between the artifact and its context of use**.
+	- Assess **the suitability of the approach** to the proposed problem.
+	- Consider **technical trade-offs** (e.g., performance vs. readability, simplicity vs. extensibility).
+
+3. **Structured Evaluation**
+
+	- **Requirement Coverage** → does it fully meet the request?
+	- **Logical Consistency** → are there contradictions, inconsistencies, or gaps?
+	- **Technical Quality** → clarity, readability, correct use of patterns.
+	- **Standards and Best Practices** → does it follow accepted conventions for the domain?
+	- **Scalability and Maintainability** → is it sustainable in the long term?
+
+4. **Issue Identification**
+
+	- Categorize by **severity**:
+
+	  - 🚨 **Critical** → severe violations or issues that make usage unfeasible.
+	  - ⚠️ **Important** → problems that compromise quality/maintainability.
+	  - ℹ️ **Note** → minor adjustments or refinement suggestions.
+
+	- Always cite **concrete evidence** from the artifact to support the critique.
+
+5. **Actionable Recommendations**
+
+	- Provide **clear and feasible suggestions** for each issue.
+	- Explain **why** the change is necessary and **how** it improves the outcome.
+	- If there are multiple solutions, present pros and cons.
+
+6. **Continuous Improvement View**
+
+	- Point out **opportunities for evolution** beyond the requested scope.
+	- Identify recurring patterns that indicate systemic issues.
+
+---
+
+### **OUTPUT FORMAT**
+
+```
+📋 Overall Assessment
+Objective summary of how well the result meets the request, highlighting high-level strengths and weaknesses.
+
+✅ Strengths
+- [Positive point] + justification.
+- [Positive point] + justification.
+
+⚠️ Issues Found
+1. [Severity] Problem description + artifact evidence + violated criterion.
+2. [Severity] ...
+
+💡 Recommendations
+- [Recommendation] + explanation + expected impact.
+- [Alternative/option] with trade-offs.
+
+📈 Evolution Notes
+Suggestions for future improvements aligned with excellence standards.
+```
+
+---
+
+### **ESSENTIAL RULES**
+
+- Always cite concrete examples from the artifact.
+- Do not soften critical issues.
+- Keep a constructive but direct tone.
+- Avoid jargon without explanation.
+- Question omissions and inconsistencies even if they are not in the original scope.
+- Assume the requester expects **clarity, assertiveness, and depth**.
+
+**📄 Original Request:**
+Analise a estrutura de memória e gere recomendações de organização
+
+**📦 Generated Response:**
+
+🤖 **MEMORY ORGANIZER AGENT - YOLO MODE** 🤖
+
+Você é um agente especializado em organização inteligente de sistemas de memória MCP. Sua missão é analisar a estrutura atual e propor melhorias automáticas para otimizar a organização, criar links úteis e melhorar a usabilidade.
+
+## 📊 ANÁLISE ATUAL DA MEMÓRIA
+
+```json
+{
+  "error": "Main memory not loaded"
+}
+```
+
+## 🛠️ FUNÇÕES DISPONÍVEIS
+
+- memory_main_get - Get main memory or specific section
+- memory_main_update - Update main memory section
+- memory_main_add_context - Add new context to main memory
+- memory_create - Create a new memory entry
+- memory_read - Read memory by path
+- links_create - Create new link between memories
+- links_read - Read links for context/subcontext
+- submemory_create - Create new submemory
+- submemory_read - Read submemory content
+- submemory_update - Update submemory content
+- submemory_delete - Delete submemory
+- get_memory_tree - Get memory tree structure
+- get_filesystem_tree - Get file system tree
+- search_memories - Full-text search across memories
+- stats - Get system statistics
+- validate_system - Validate system integrity
+- heartbeat_status - Get heartbeat monitor status
+
+## 🎯 OBJETIVOS DE ORGANIZAÇÃO
+
+1. **Criar Links Inteligentes**: Identificar memórias relacionadas e criar conexões lógicas
+2. **Otimizar Estrutura de Contextos**: Reorganizar contextos para melhor navegação
+3. **Melhorar Submemórias**: Agrupar informações relacionadas em submemórias coerentes
+4. **Limpar Redundâncias**: Identificar e consolidar informações duplicadas
+5. **Estabelecer Hierarquias**: Criar estruturas hierárquicas lógicas
+
+## 📋 FORMATO DE RESPOSTA
+
+Responda APENAS com um JSON válido seguindo este formato:
+
+```json
+{
+  "analysis": {
+    "currentState": "Breve descrição do estado atual",
+    "issues": ["Problema 1", "Problema 2"],
+    "opportunities": ["Oportunidade 1", "Oportunidade 2"]
+  },
+  "recommendations": [
+    {
+      "type": "create_link",
+      "priority": "high|medium|low", 
+      "description": "Descrição da ação",
+      "action": {
+        "function": "links_create",
+        "params": {
+          "context": "nome_contexto",
+          "subcontext": "nome_subcontexto", 
+          "description": "Descrição do link",
+          "memory_path": "caminho/para/memoria"
+        }
+      }
+    },
+    {
+      "type": "create_context",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação", 
+      "action": {
+        "function": "memory_main_add_context",
+        "params": {
+          "name": "novo_contexto",
+          "description": "Descrição do contexto",
+          "priority": 5
+        }
+      }
+    },
+    {
+      "type": "create_memory",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação",
+      "action": {
+        "function": "memory_create", 
+        "params": {
+          "context": "contexto",
+          "subcontext": "subcontexto",
+          "title": "Título da memória",
+          "content": "Conteúdo organizacional",
+          "importance": "medium",
+          "tags": ["organização", "automático"]
+        }
+      }
+    }
+  ]
+}
+```
+
+## ⚡ MODO YOLO ATIVADO
+
+- Seja PROATIVO: Sugira melhorias mesmo sem solicitação explícita
+- Seja INTELIGENTE: Use padrões e heurísticas para identificar oportunidades
+- Seja ÚTIL: Foque em ações que realmente melhorem a organização
+- Limite-se a 5-8 recomendações por execução para não sobrecarregar
+
+Analise e organize! 🚀
+    
+	 '' timed out after 300 seconds
+2025-09-01T18:03:58.490Z [INFO] 🤖 Executing 0 recommendations in YOLO mode
+2025-09-01T18:03:58.490Z [INFO] Memory organization completed for /home/wisiex/projects/memcp
+2025-09-01T18:03:58.499Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T18:03:58.500Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T18:04:58.500Z [ERROR] Error generating recommendations: Error: Command 'gemini -p '
+> You are a senior analytical critic, specialized in evaluating technical work based on **evidence, standards, and logic**. Your goal is to review a generated artifact (code, diagram, documentation, process, architecture, etc.) and produce a highly detailed, well-founded, and actionable technical-critical report. You must not modify any artifact; instead, write a response that analyzes the artifact against the established criteria.
+
+---
+
+### **INPUTS**
+
+1. **📄 Request Text** — a detailed description of what should have been produced (explicit and implicit requirements).
+2. **📦 Generated Result** — the artifact to be evaluated.
+
+---
+
+### **THINKING AND ACTION MODE**
+
+1. **Criteria Extraction**
+
+	- Identify **all explicit criteria** (what was clearly requested).
+	- Detect **implicit criteria** (best practices and expected quality standards even if not mentioned).
+	- Map **priorities** (what is essential vs. what is optional).
+
+2. **Contextual Analysis**
+
+	- Check **coherence between the artifact and its context of use**.
+	- Assess **the suitability of the approach** to the proposed problem.
+	- Consider **technical trade-offs** (e.g., performance vs. readability, simplicity vs. extensibility).
+
+3. **Structured Evaluation**
+
+	- **Requirement Coverage** → does it fully meet the request?
+	- **Logical Consistency** → are there contradictions, inconsistencies, or gaps?
+	- **Technical Quality** → clarity, readability, correct use of patterns.
+	- **Standards and Best Practices** → does it follow accepted conventions for the domain?
+	- **Scalability and Maintainability** → is it sustainable in the long term?
+
+4. **Issue Identification**
+
+	- Categorize by **severity**:
+
+	  - 🚨 **Critical** → severe violations or issues that make usage unfeasible.
+	  - ⚠️ **Important** → problems that compromise quality/maintainability.
+	  - ℹ️ **Note** → minor adjustments or refinement suggestions.
+
+	- Always cite **concrete evidence** from the artifact to support the critique.
+
+5. **Actionable Recommendations**
+
+	- Provide **clear and feasible suggestions** for each issue.
+	- Explain **why** the change is necessary and **how** it improves the outcome.
+	- If there are multiple solutions, present pros and cons.
+
+6. **Continuous Improvement View**
+
+	- Point out **opportunities for evolution** beyond the requested scope.
+	- Identify recurring patterns that indicate systemic issues.
+
+---
+
+### **OUTPUT FORMAT**
+
+```
+📋 Overall Assessment
+Objective summary of how well the result meets the request, highlighting high-level strengths and weaknesses.
+
+✅ Strengths
+- [Positive point] + justification.
+- [Positive point] + justification.
+
+⚠️ Issues Found
+1. [Severity] Problem description + artifact evidence + violated criterion.
+2. [Severity] ...
+
+💡 Recommendations
+- [Recommendation] + explanation + expected impact.
+- [Alternative/option] with trade-offs.
+
+📈 Evolution Notes
+Suggestions for future improvements aligned with excellence standards.
+```
+
+---
+
+### **ESSENTIAL RULES**
+
+- Always cite concrete examples from the artifact.
+- Do not soften critical issues.
+- Keep a constructive but direct tone.
+- Avoid jargon without explanation.
+- Question omissions and inconsistencies even if they are not in the original scope.
+- Assume the requester expects **clarity, assertiveness, and depth**.
+
+**📄 Original Request:**
+Analise a estrutura de memória e gere recomendações de organização
+
+**📦 Generated Response:**
+
+🤖 **MEMORY ORGANIZER AGENT - YOLO MODE** 🤖
+
+Você é um agente especializado em organização inteligente de sistemas de memória MCP. Sua missão é analisar a estrutura atual e propor melhorias automáticas para otimizar a organização, criar links úteis e melhorar a usabilidade.
+
+## 📊 ANÁLISE ATUAL DA MEMÓRIA
+
+```json
+{
+  "error": "Main memory not loaded"
+}
+```
+
+## 🛠️ FUNÇÕES DISPONÍVEIS
+
+- memory_main_get - Get main memory or specific section
+- memory_main_update - Update main memory section
+- memory_main_add_context - Add new context to main memory
+- memory_create - Create a new memory entry
+- memory_read - Read memory by path
+- links_create - Create new link between memories
+- links_read - Read links for context/subcontext
+- submemory_create - Create new submemory
+- submemory_read - Read submemory content
+- submemory_update - Update submemory content
+- submemory_delete - Delete submemory
+- get_memory_tree - Get memory tree structure
+- get_filesystem_tree - Get file system tree
+- search_memories - Full-text search across memories
+- stats - Get system statistics
+- validate_system - Validate system integrity
+- heartbeat_status - Get heartbeat monitor status
+
+## 🎯 OBJETIVOS DE ORGANIZAÇÃO
+
+1. **Criar Links Inteligentes**: Identificar memórias relacionadas e criar conexões lógicas
+2. **Otimizar Estrutura de Contextos**: Reorganizar contextos para melhor navegação
+3. **Melhorar Submemórias**: Agrupar informações relacionadas em submemórias coerentes
+4. **Limpar Redundâncias**: Identificar e consolidar informações duplicadas
+5. **Estabelecer Hierarquias**: Criar estruturas hierárquicas lógicas
+
+## 📋 FORMATO DE RESPOSTA
+
+Responda APENAS com um JSON válido seguindo este formato:
+
+```json
+{
+  "analysis": {
+    "currentState": "Breve descrição do estado atual",
+    "issues": ["Problema 1", "Problema 2"],
+    "opportunities": ["Oportunidade 1", "Oportunidade 2"]
+  },
+  "recommendations": [
+    {
+      "type": "create_link",
+      "priority": "high|medium|low", 
+      "description": "Descrição da ação",
+      "action": {
+        "function": "links_create",
+        "params": {
+          "context": "nome_contexto",
+          "subcontext": "nome_subcontexto", 
+          "description": "Descrição do link",
+          "memory_path": "caminho/para/memoria"
+        }
+      }
+    },
+    {
+      "type": "create_context",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação", 
+      "action": {
+        "function": "memory_main_add_context",
+        "params": {
+          "name": "novo_contexto",
+          "description": "Descrição do contexto",
+          "priority": 5
+        }
+      }
+    },
+    {
+      "type": "create_memory",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação",
+      "action": {
+        "function": "memory_create", 
+        "params": {
+          "context": "contexto",
+          "subcontext": "subcontexto",
+          "title": "Título da memória",
+          "content": "Conteúdo organizacional",
+          "importance": "medium",
+          "tags": ["organização", "automático"]
+        }
+      }
+    }
+  ]
+}
+```
+
+## ⚡ MODO YOLO ATIVADO
+
+- Seja PROATIVO: Sugira melhorias mesmo sem solicitação explícita
+- Seja INTELIGENTE: Use padrões e heurísticas para identificar oportunidades
+- Seja ÚTIL: Foque em ações que realmente melhorem a organização
+- Limite-se a 5-8 recomendações por execução para não sobrecarregar
+
+Analise e organize! 🚀
+    
+	 '' timed out after 300 seconds
+2025-09-01T18:04:58.500Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T18:04:58.500Z [INFO] 🤖 Executing 0 recommendations in YOLO mode
+2025-09-01T18:04:58.501Z [INFO] Memory organization completed for /home/wisiex/projects/memcp
+2025-09-01T18:04:58.501Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T18:05:58.503Z [ERROR] Error generating recommendations: Error: Command 'gemini -p '
+> You are a senior analytical critic, specialized in evaluating technical work based on **evidence, standards, and logic**. Your goal is to review a generated artifact (code, diagram, documentation, process, architecture, etc.) and produce a highly detailed, well-founded, and actionable technical-critical report. You must not modify any artifact; instead, write a response that analyzes the artifact against the established criteria.
+
+---
+
+### **INPUTS**
+
+1. **📄 Request Text** — a detailed description of what should have been produced (explicit and implicit requirements).
+2. **📦 Generated Result** — the artifact to be evaluated.
+
+---
+
+### **THINKING AND ACTION MODE**
+
+1. **Criteria Extraction**
+
+	- Identify **all explicit criteria** (what was clearly requested).
+	- Detect **implicit criteria** (best practices and expected quality standards even if not mentioned).
+	- Map **priorities** (what is essential vs. what is optional).
+
+2. **Contextual Analysis**
+
+	- Check **coherence between the artifact and its context of use**.
+	- Assess **the suitability of the approach** to the proposed problem.
+	- Consider **technical trade-offs** (e.g., performance vs. readability, simplicity vs. extensibility).
+
+3. **Structured Evaluation**
+
+	- **Requirement Coverage** → does it fully meet the request?
+	- **Logical Consistency** → are there contradictions, inconsistencies, or gaps?
+	- **Technical Quality** → clarity, readability, correct use of patterns.
+	- **Standards and Best Practices** → does it follow accepted conventions for the domain?
+	- **Scalability and Maintainability** → is it sustainable in the long term?
+
+4. **Issue Identification**
+
+	- Categorize by **severity**:
+
+	  - 🚨 **Critical** → severe violations or issues that make usage unfeasible.
+	  - ⚠️ **Important** → problems that compromise quality/maintainability.
+	  - ℹ️ **Note** → minor adjustments or refinement suggestions.
+
+	- Always cite **concrete evidence** from the artifact to support the critique.
+
+5. **Actionable Recommendations**
+
+	- Provide **clear and feasible suggestions** for each issue.
+	- Explain **why** the change is necessary and **how** it improves the outcome.
+	- If there are multiple solutions, present pros and cons.
+
+6. **Continuous Improvement View**
+
+	- Point out **opportunities for evolution** beyond the requested scope.
+	- Identify recurring patterns that indicate systemic issues.
+
+---
+
+### **OUTPUT FORMAT**
+
+```
+📋 Overall Assessment
+Objective summary of how well the result meets the request, highlighting high-level strengths and weaknesses.
+
+✅ Strengths
+- [Positive point] + justification.
+- [Positive point] + justification.
+
+⚠️ Issues Found
+1. [Severity] Problem description + artifact evidence + violated criterion.
+2. [Severity] ...
+
+💡 Recommendations
+- [Recommendation] + explanation + expected impact.
+- [Alternative/option] with trade-offs.
+
+📈 Evolution Notes
+Suggestions for future improvements aligned with excellence standards.
+```
+
+---
+
+### **ESSENTIAL RULES**
+
+- Always cite concrete examples from the artifact.
+- Do not soften critical issues.
+- Keep a constructive but direct tone.
+- Avoid jargon without explanation.
+- Question omissions and inconsistencies even if they are not in the original scope.
+- Assume the requester expects **clarity, assertiveness, and depth**.
+
+**📄 Original Request:**
+Analise a estrutura de memória e gere recomendações de organização
+
+**📦 Generated Response:**
+
+🤖 **MEMORY ORGANIZER AGENT - YOLO MODE** 🤖
+
+Você é um agente especializado em organização inteligente de sistemas de memória MCP. Sua missão é analisar a estrutura atual e propor melhorias automáticas para otimizar a organização, criar links úteis e melhorar a usabilidade.
+
+## 📊 ANÁLISE ATUAL DA MEMÓRIA
+
+```json
+{
+  "error": "Main memory not loaded"
+}
+```
+
+## 🛠️ FUNÇÕES DISPONÍVEIS
+
+- memory_main_get - Get main memory or specific section
+- memory_main_update - Update main memory section
+- memory_main_add_context - Add new context to main memory
+- memory_create - Create a new memory entry
+- memory_read - Read memory by path
+- links_create - Create new link between memories
+- links_read - Read links for context/subcontext
+- submemory_create - Create new submemory
+- submemory_read - Read submemory content
+- submemory_update - Update submemory content
+- submemory_delete - Delete submemory
+- get_memory_tree - Get memory tree structure
+- get_filesystem_tree - Get file system tree
+- search_memories - Full-text search across memories
+- stats - Get system statistics
+- validate_system - Validate system integrity
+- heartbeat_status - Get heartbeat monitor status
+
+## 🎯 OBJETIVOS DE ORGANIZAÇÃO
+
+1. **Criar Links Inteligentes**: Identificar memórias relacionadas e criar conexões lógicas
+2. **Otimizar Estrutura de Contextos**: Reorganizar contextos para melhor navegação
+3. **Melhorar Submemórias**: Agrupar informações relacionadas em submemórias coerentes
+4. **Limpar Redundâncias**: Identificar e consolidar informações duplicadas
+5. **Estabelecer Hierarquias**: Criar estruturas hierárquicas lógicas
+
+## 📋 FORMATO DE RESPOSTA
+
+Responda APENAS com um JSON válido seguindo este formato:
+
+```json
+{
+  "analysis": {
+    "currentState": "Breve descrição do estado atual",
+    "issues": ["Problema 1", "Problema 2"],
+    "opportunities": ["Oportunidade 1", "Oportunidade 2"]
+  },
+  "recommendations": [
+    {
+      "type": "create_link",
+      "priority": "high|medium|low", 
+      "description": "Descrição da ação",
+      "action": {
+        "function": "links_create",
+        "params": {
+          "context": "nome_contexto",
+          "subcontext": "nome_subcontexto", 
+          "description": "Descrição do link",
+          "memory_path": "caminho/para/memoria"
+        }
+      }
+    },
+    {
+      "type": "create_context",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação", 
+      "action": {
+        "function": "memory_main_add_context",
+        "params": {
+          "name": "novo_contexto",
+          "description": "Descrição do contexto",
+          "priority": 5
+        }
+      }
+    },
+    {
+      "type": "create_memory",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação",
+      "action": {
+        "function": "memory_create", 
+        "params": {
+          "context": "contexto",
+          "subcontext": "subcontexto",
+          "title": "Título da memória",
+          "content": "Conteúdo organizacional",
+          "importance": "medium",
+          "tags": ["organização", "automático"]
+        }
+      }
+    }
+  ]
+}
+```
+
+## ⚡ MODO YOLO ATIVADO
+
+- Seja PROATIVO: Sugira melhorias mesmo sem solicitação explícita
+- Seja INTELIGENTE: Use padrões e heurísticas para identificar oportunidades
+- Seja ÚTIL: Foque em ações que realmente melhorem a organização
+- Limite-se a 5-8 recomendações por execução para não sobrecarregar
+
+Analise e organize! 🚀
+    
+	 '' timed out after 300 seconds
+2025-09-01T18:05:58.503Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T18:05:58.503Z [INFO] 🤖 Executing 0 recommendations in YOLO mode
+2025-09-01T18:05:58.503Z [INFO] Memory organization completed for /home/wisiex/projects/memcp
+2025-09-01T18:05:58.504Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T18:06:58.510Z [ERROR] Error generating recommendations: Error: Command 'gemini -p '
+> You are a senior analytical critic, specialized in evaluating technical work based on **evidence, standards, and logic**. Your goal is to review a generated artifact (code, diagram, documentation, process, architecture, etc.) and produce a highly detailed, well-founded, and actionable technical-critical report. You must not modify any artifact; instead, write a response that analyzes the artifact against the established criteria.
+
+---
+
+### **INPUTS**
+
+1. **📄 Request Text** — a detailed description of what should have been produced (explicit and implicit requirements).
+2. **📦 Generated Result** — the artifact to be evaluated.
+
+---
+
+### **THINKING AND ACTION MODE**
+
+1. **Criteria Extraction**
+
+	- Identify **all explicit criteria** (what was clearly requested).
+	- Detect **implicit criteria** (best practices and expected quality standards even if not mentioned).
+	- Map **priorities** (what is essential vs. what is optional).
+
+2. **Contextual Analysis**
+
+	- Check **coherence between the artifact and its context of use**.
+	- Assess **the suitability of the approach** to the proposed problem.
+	- Consider **technical trade-offs** (e.g., performance vs. readability, simplicity vs. extensibility).
+
+3. **Structured Evaluation**
+
+	- **Requirement Coverage** → does it fully meet the request?
+	- **Logical Consistency** → are there contradictions, inconsistencies, or gaps?
+	- **Technical Quality** → clarity, readability, correct use of patterns.
+	- **Standards and Best Practices** → does it follow accepted conventions for the domain?
+	- **Scalability and Maintainability** → is it sustainable in the long term?
+
+4. **Issue Identification**
+
+	- Categorize by **severity**:
+
+	  - 🚨 **Critical** → severe violations or issues that make usage unfeasible.
+	  - ⚠️ **Important** → problems that compromise quality/maintainability.
+	  - ℹ️ **Note** → minor adjustments or refinement suggestions.
+
+	- Always cite **concrete evidence** from the artifact to support the critique.
+
+5. **Actionable Recommendations**
+
+	- Provide **clear and feasible suggestions** for each issue.
+	- Explain **why** the change is necessary and **how** it improves the outcome.
+	- If there are multiple solutions, present pros and cons.
+
+6. **Continuous Improvement View**
+
+	- Point out **opportunities for evolution** beyond the requested scope.
+	- Identify recurring patterns that indicate systemic issues.
+
+---
+
+### **OUTPUT FORMAT**
+
+```
+📋 Overall Assessment
+Objective summary of how well the result meets the request, highlighting high-level strengths and weaknesses.
+
+✅ Strengths
+- [Positive point] + justification.
+- [Positive point] + justification.
+
+⚠️ Issues Found
+1. [Severity] Problem description + artifact evidence + violated criterion.
+2. [Severity] ...
+
+💡 Recommendations
+- [Recommendation] + explanation + expected impact.
+- [Alternative/option] with trade-offs.
+
+📈 Evolution Notes
+Suggestions for future improvements aligned with excellence standards.
+```
+
+---
+
+### **ESSENTIAL RULES**
+
+- Always cite concrete examples from the artifact.
+- Do not soften critical issues.
+- Keep a constructive but direct tone.
+- Avoid jargon without explanation.
+- Question omissions and inconsistencies even if they are not in the original scope.
+- Assume the requester expects **clarity, assertiveness, and depth**.
+
+**📄 Original Request:**
+Analise a estrutura de memória e gere recomendações de organização
+
+**📦 Generated Response:**
+
+🤖 **MEMORY ORGANIZER AGENT - YOLO MODE** 🤖
+
+Você é um agente especializado em organização inteligente de sistemas de memória MCP. Sua missão é analisar a estrutura atual e propor melhorias automáticas para otimizar a organização, criar links úteis e melhorar a usabilidade.
+
+## 📊 ANÁLISE ATUAL DA MEMÓRIA
+
+```json
+{
+  "error": "Main memory not loaded"
+}
+```
+
+## 🛠️ FUNÇÕES DISPONÍVEIS
+
+- memory_main_get - Get main memory or specific section
+- memory_main_update - Update main memory section
+- memory_main_add_context - Add new context to main memory
+- memory_create - Create a new memory entry
+- memory_read - Read memory by path
+- links_create - Create new link between memories
+- links_read - Read links for context/subcontext
+- submemory_create - Create new submemory
+- submemory_read - Read submemory content
+- submemory_update - Update submemory content
+- submemory_delete - Delete submemory
+- get_memory_tree - Get memory tree structure
+- get_filesystem_tree - Get file system tree
+- search_memories - Full-text search across memories
+- stats - Get system statistics
+- validate_system - Validate system integrity
+- heartbeat_status - Get heartbeat monitor status
+
+## 🎯 OBJETIVOS DE ORGANIZAÇÃO
+
+1. **Criar Links Inteligentes**: Identificar memórias relacionadas e criar conexões lógicas
+2. **Otimizar Estrutura de Contextos**: Reorganizar contextos para melhor navegação
+3. **Melhorar Submemórias**: Agrupar informações relacionadas em submemórias coerentes
+4. **Limpar Redundâncias**: Identificar e consolidar informações duplicadas
+5. **Estabelecer Hierarquias**: Criar estruturas hierárquicas lógicas
+
+## 📋 FORMATO DE RESPOSTA
+
+Responda APENAS com um JSON válido seguindo este formato:
+
+```json
+{
+  "analysis": {
+    "currentState": "Breve descrição do estado atual",
+    "issues": ["Problema 1", "Problema 2"],
+    "opportunities": ["Oportunidade 1", "Oportunidade 2"]
+  },
+  "recommendations": [
+    {
+      "type": "create_link",
+      "priority": "high|medium|low", 
+      "description": "Descrição da ação",
+      "action": {
+        "function": "links_create",
+        "params": {
+          "context": "nome_contexto",
+          "subcontext": "nome_subcontexto", 
+          "description": "Descrição do link",
+          "memory_path": "caminho/para/memoria"
+        }
+      }
+    },
+    {
+      "type": "create_context",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação", 
+      "action": {
+        "function": "memory_main_add_context",
+        "params": {
+          "name": "novo_contexto",
+          "description": "Descrição do contexto",
+          "priority": 5
+        }
+      }
+    },
+    {
+      "type": "create_memory",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação",
+      "action": {
+        "function": "memory_create", 
+        "params": {
+          "context": "contexto",
+          "subcontext": "subcontexto",
+          "title": "Título da memória",
+          "content": "Conteúdo organizacional",
+          "importance": "medium",
+          "tags": ["organização", "automático"]
+        }
+      }
+    }
+  ]
+}
+```
+
+## ⚡ MODO YOLO ATIVADO
+
+- Seja PROATIVO: Sugira melhorias mesmo sem solicitação explícita
+- Seja INTELIGENTE: Use padrões e heurísticas para identificar oportunidades
+- Seja ÚTIL: Foque em ações que realmente melhorem a organização
+- Limite-se a 5-8 recomendações por execução para não sobrecarregar
+
+Analise e organize! 🚀
+    
+	 '' timed out after 300 seconds
+2025-09-01T18:06:58.510Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T18:06:58.510Z [INFO] 🤖 Executing 0 recommendations in YOLO mode
+2025-09-01T18:06:58.511Z [INFO] Memory organization completed for /home/wisiex/projects/memcp
+2025-09-01T18:06:58.511Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T18:07:58.510Z [ERROR] Error generating recommendations: Error: Command 'gemini -p '
+> You are a senior analytical critic, specialized in evaluating technical work based on **evidence, standards, and logic**. Your goal is to review a generated artifact (code, diagram, documentation, process, architecture, etc.) and produce a highly detailed, well-founded, and actionable technical-critical report. You must not modify any artifact; instead, write a response that analyzes the artifact against the established criteria.
+
+---
+
+### **INPUTS**
+
+1. **📄 Request Text** — a detailed description of what should have been produced (explicit and implicit requirements).
+2. **📦 Generated Result** — the artifact to be evaluated.
+
+---
+
+### **THINKING AND ACTION MODE**
+
+1. **Criteria Extraction**
+
+	- Identify **all explicit criteria** (what was clearly requested).
+	- Detect **implicit criteria** (best practices and expected quality standards even if not mentioned).
+	- Map **priorities** (what is essential vs. what is optional).
+
+2. **Contextual Analysis**
+
+	- Check **coherence between the artifact and its context of use**.
+	- Assess **the suitability of the approach** to the proposed problem.
+	- Consider **technical trade-offs** (e.g., performance vs. readability, simplicity vs. extensibility).
+
+3. **Structured Evaluation**
+
+	- **Requirement Coverage** → does it fully meet the request?
+	- **Logical Consistency** → are there contradictions, inconsistencies, or gaps?
+	- **Technical Quality** → clarity, readability, correct use of patterns.
+	- **Standards and Best Practices** → does it follow accepted conventions for the domain?
+	- **Scalability and Maintainability** → is it sustainable in the long term?
+
+4. **Issue Identification**
+
+	- Categorize by **severity**:
+
+	  - 🚨 **Critical** → severe violations or issues that make usage unfeasible.
+	  - ⚠️ **Important** → problems that compromise quality/maintainability.
+	  - ℹ️ **Note** → minor adjustments or refinement suggestions.
+
+	- Always cite **concrete evidence** from the artifact to support the critique.
+
+5. **Actionable Recommendations**
+
+	- Provide **clear and feasible suggestions** for each issue.
+	- Explain **why** the change is necessary and **how** it improves the outcome.
+	- If there are multiple solutions, present pros and cons.
+
+6. **Continuous Improvement View**
+
+	- Point out **opportunities for evolution** beyond the requested scope.
+	- Identify recurring patterns that indicate systemic issues.
+
+---
+
+### **OUTPUT FORMAT**
+
+```
+📋 Overall Assessment
+Objective summary of how well the result meets the request, highlighting high-level strengths and weaknesses.
+
+✅ Strengths
+- [Positive point] + justification.
+- [Positive point] + justification.
+
+⚠️ Issues Found
+1. [Severity] Problem description + artifact evidence + violated criterion.
+2. [Severity] ...
+
+💡 Recommendations
+- [Recommendation] + explanation + expected impact.
+- [Alternative/option] with trade-offs.
+
+📈 Evolution Notes
+Suggestions for future improvements aligned with excellence standards.
+```
+
+---
+
+### **ESSENTIAL RULES**
+
+- Always cite concrete examples from the artifact.
+- Do not soften critical issues.
+- Keep a constructive but direct tone.
+- Avoid jargon without explanation.
+- Question omissions and inconsistencies even if they are not in the original scope.
+- Assume the requester expects **clarity, assertiveness, and depth**.
+
+**📄 Original Request:**
+Analise a estrutura de memória e gere recomendações de organização
+
+**📦 Generated Response:**
+
+🤖 **MEMORY ORGANIZER AGENT - YOLO MODE** 🤖
+
+Você é um agente especializado em organização inteligente de sistemas de memória MCP. Sua missão é analisar a estrutura atual e propor melhorias automáticas para otimizar a organização, criar links úteis e melhorar a usabilidade.
+
+## 📊 ANÁLISE ATUAL DA MEMÓRIA
+
+```json
+{
+  "error": "Main memory not loaded"
+}
+```
+
+## 🛠️ FUNÇÕES DISPONÍVEIS
+
+- memory_main_get - Get main memory or specific section
+- memory_main_update - Update main memory section
+- memory_main_add_context - Add new context to main memory
+- memory_create - Create a new memory entry
+- memory_read - Read memory by path
+- links_create - Create new link between memories
+- links_read - Read links for context/subcontext
+- submemory_create - Create new submemory
+- submemory_read - Read submemory content
+- submemory_update - Update submemory content
+- submemory_delete - Delete submemory
+- get_memory_tree - Get memory tree structure
+- get_filesystem_tree - Get file system tree
+- search_memories - Full-text search across memories
+- stats - Get system statistics
+- validate_system - Validate system integrity
+- heartbeat_status - Get heartbeat monitor status
+
+## 🎯 OBJETIVOS DE ORGANIZAÇÃO
+
+1. **Criar Links Inteligentes**: Identificar memórias relacionadas e criar conexões lógicas
+2. **Otimizar Estrutura de Contextos**: Reorganizar contextos para melhor navegação
+3. **Melhorar Submemórias**: Agrupar informações relacionadas em submemórias coerentes
+4. **Limpar Redundâncias**: Identificar e consolidar informações duplicadas
+5. **Estabelecer Hierarquias**: Criar estruturas hierárquicas lógicas
+
+## 📋 FORMATO DE RESPOSTA
+
+Responda APENAS com um JSON válido seguindo este formato:
+
+```json
+{
+  "analysis": {
+    "currentState": "Breve descrição do estado atual",
+    "issues": ["Problema 1", "Problema 2"],
+    "opportunities": ["Oportunidade 1", "Oportunidade 2"]
+  },
+  "recommendations": [
+    {
+      "type": "create_link",
+      "priority": "high|medium|low", 
+      "description": "Descrição da ação",
+      "action": {
+        "function": "links_create",
+        "params": {
+          "context": "nome_contexto",
+          "subcontext": "nome_subcontexto", 
+          "description": "Descrição do link",
+          "memory_path": "caminho/para/memoria"
+        }
+      }
+    },
+    {
+      "type": "create_context",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação", 
+      "action": {
+        "function": "memory_main_add_context",
+        "params": {
+          "name": "novo_contexto",
+          "description": "Descrição do contexto",
+          "priority": 5
+        }
+      }
+    },
+    {
+      "type": "create_memory",
+      "priority": "high|medium|low",
+      "description": "Descrição da ação",
+      "action": {
+        "function": "memory_create", 
+        "params": {
+          "context": "contexto",
+          "subcontext": "subcontexto",
+          "title": "Título da memória",
+          "content": "Conteúdo organizacional",
+          "importance": "medium",
+          "tags": ["organização", "automático"]
+        }
+      }
+    }
+  ]
+}
+```
+
+## ⚡ MODO YOLO ATIVADO
+
+- Seja PROATIVO: Sugira melhorias mesmo sem solicitação explícita
+- Seja INTELIGENTE: Use padrões e heurísticas para identificar oportunidades
+- Seja ÚTIL: Foque em ações que realmente melhorem a organização
+- Limite-se a 5-8 recomendações por execução para não sobrecarregar
+
+Analise e organize! 🚀
+    
+	 '' timed out after 300 seconds
+2025-09-01T18:07:58.510Z [INFO] Running memory organization for /home/wisiex/projects/memcp
+2025-09-01T18:07:58.510Z [INFO] 🤖 Executing 0 recommendations in YOLO mode
+2025-09-01T18:07:58.510Z [INFO] Memory organization completed for /home/wisiex/projects/memcp
+2025-09-01T18:07:58.510Z [ERROR] Error analyzing memory: CacheError: Main memory not loaded
+2025-09-01T18:08:57.242Z [INFO] Memory organizer stopped
