@@ -62,12 +62,10 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
    */
   async start(): Promise<void> {
     if (this.isRunning) {
-      console.error("Multi-path heartbeat monitor is already running");
       return;
     }
 
     if (!this.options.enabled) {
-      console.error("Multi-path heartbeat monitor is disabled");
       return;
     }
 
@@ -87,16 +85,10 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
         });
       }, this.options.interval * 1000);
 
-      console.error(
-        `Multi-path heartbeat monitor started for ${this.options.paths.length} paths (${this.options.interval}s interval)`
-      );
-      this.options.paths.forEach((p) => {
-        console.error(`  - ${this.heartbeatFiles.get(p)}`);
-      });
+      // (No log)
 
       // Iniciar organizador de memória se habilitado
       if (this.memoryOrganizer && this.options.memoryOrganizerEnabled) {
-        console.error("🤖 Starting memory organizer with YOLO mode");
         this.memoryOrganizer.start(
           this.options.paths,
           this.options.memoryOrganizerInterval
@@ -125,7 +117,6 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
 
     // Parar organizador de memória
     if (this.memoryOrganizer) {
-      console.error("🤖 Stopping memory organizer");
       this.memoryOrganizer.stop();
     }
 
@@ -137,7 +128,7 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
     }
 
     this.isRunning = false;
-    console.error("Multi-path heartbeat monitor stopped");
+    // (No log)
   }
 
   /**
@@ -152,7 +143,7 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
       } catch {
         // Diretório não existe, criar
         await fs.mkdir(memoryPath, { recursive: true });
-        console.error(`Created ia-memory directory: ${memoryPath}`);
+        // (No log)
       }
     });
 
@@ -175,10 +166,7 @@ export class MultiPathHeartbeatMonitor extends EventEmitter {
           try {
             await fs.writeFile(filePath, entry, "utf8");
           } catch (createError) {
-            console.error(
-              `Failed to write heartbeat for ${projectPath}:`,
-              createError
-            );
+            // (No log)
             throw createError;
           }
         }

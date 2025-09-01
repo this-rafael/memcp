@@ -34,9 +34,7 @@ class MemoryOrganizerLogger {
       const logEntry = `${timestamp} [${level}] ${message}\n`;
       await fsPromises.appendFile(this.logFilePath, logEntry, "utf8");
     } catch (error) {
-      // Fallback para console.error se não conseguir escrever no arquivo
-      console.error(`Failed to write to log file: ${error}`);
-      console.error(`${level}: ${message}`);
+      // Silencioso: não faz fallback para console
     }
   }
 

@@ -90,9 +90,15 @@ export class SearchIndex {
       const fullPath = path.join(this.memoryPath, relativePath);
       const memory = await FileSystemUtils.readMarkdown(fullPath);
 
-      const tagsString = memory.frontmatter.tags
-        ? memory.frontmatter.tags.join(" ")
-        : "";
+      // Corrigir: garantir que tags seja array
+      let tagsArr = memory.frontmatter.tags;
+      if (typeof tagsArr === "string") {
+        tagsArr = [tagsArr];
+      } else if (!Array.isArray(tagsArr)) {
+        tagsArr = [];
+      }
+
+      const tagsString = tagsArr.length > 0 ? tagsArr.join(" ") : "";
 
       // Insert into FTS5 table
       const insertFTS = this.db.prepare(`
@@ -126,7 +132,7 @@ export class SearchIndex {
         memory.frontmatter.context,
         memory.frontmatter.subcontext,
         memory.frontmatter.importance,
-        JSON.stringify(memory.frontmatter.tags || []),
+        JSON.stringify(tagsArr),
         memory.frontmatter.created_at,
         memory.frontmatter.updated_at,
         memory.content.length
