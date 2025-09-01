@@ -8,6 +8,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 // Import tools
+import { CriticTools } from "./tools/critic.tool.js";
 import { init, validateSystem } from "./tools/init.tool.js";
 import { LinksTools } from "./tools/links.tool.js";
 import { MainMemoryTools } from "./tools/main-memory.tool.js";
@@ -17,6 +18,7 @@ import { NavigationTools } from "./tools/navigation.tool.js";
 import { SubmemoryTools } from "./tools/submemory.tool.js";
 import { FileSystemUtils } from "./utils/file-system.js";
 import { HeartbeatMonitor } from "./utils/heartbeat-monitor.js";
+import { MultiPathHeartbeatMonitor, createHeartbeatFromEnv } from "./utils/multi-path-heartbeat.js";
 
 import { ToolParams } from "./types.js";
 
@@ -27,6 +29,7 @@ const server = new Server(
 
 // Heartbeat monitor instance
 let heartbeatMonitor: HeartbeatMonitor | null = null;
+let multiPathHeartbeat: MultiPathHeartbeatMonitor | null = null;
 
 // Tool instances - will be initialized per project
 let currentProjectPath: string | null = null;
@@ -37,6 +40,7 @@ let toolInstances: {
   memory?: MemoryTools;
   navigation?: NavigationTools;
   maintenance?: MaintenanceTools;
+  critic?: CriticTools;
 } = {};
 
 // Helper function to ensure tools are initialized
@@ -51,6 +55,7 @@ async function ensureToolsInitialized(projectPath: string) {
     toolInstances.memory = new MemoryTools(memoryPath);
     toolInstances.navigation = new NavigationTools(memoryPath);
     toolInstances.maintenance = new MaintenanceTools(memoryPath);
+    toolInstances.critic = new CriticTools(projectPath);
 
     // Initialize each tool's cache
     await toolInstances.mainMemory.initialize();
@@ -342,6 +347,78 @@ const TOOLS = [
       required: ["project_path"],
     },
   },
+
+  // Executor Tools
+  {
+    name: "kritiq",
+    description:
+      "Executa uma avaliação crítica de um artefato com base em um texto de solicitação e uma resposta gerada.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        command: {
+          type: "string",
+          description: "Texto de solicitação original",
+        },
+        generated_response: {
+          type: "string",
+          description: "Artefato ou resposta gerada a ser avaliada",
+        },
+        timeout: {
+          type: "integer",
+          description: "Timeout em segundos (padrão: 600)",
+          default: 600,
+        },
+      },
+      required: ["command", "generated_response"],
+    },
+  },
+  {
+    name: "evaluate_with_gemini",
+    description:
+      "Avalia se um comando foi atendido por uma resposta gerada usando Gemini.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        command: {
+          type: "string",
+          description: "O comando original que foi solicitado",
+        },
+        generated_response: {
+          type: "string",
+          description: "A resposta gerada que deve ser avaliada",
+        },
+        timeout: {
+          type: "integer",
+          description: "Timeout em segundos (padrão: 600)",
+          default: 600,
+        },
+      },
+      required: ["command", "generated_response"],
+    },
+  },
+  {
+    name: "execute_terminal_command",
+    description: "Executa um comando no terminal e retorna o resultado.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        command: {
+          type: "string",
+          description: "Comando a ser executado no terminal",
+        },
+        working_directory: {
+          type: "string",
+          description: "Diretório de trabalho (opcional)",
+        },
+        timeout: {
+          type: "integer",
+          description: "Timeout em segundos (opcional)",
+        },
+      },
+      required: ["command"],
+    },
+  },
 ];
 
 // Register tools
@@ -526,22 +603,47 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "heartbeat_status":
         const lines = params.lines || 10;
         try {
-          // Create temporary heartbeat monitor to read status
-          const tempHeartbeat = new HeartbeatMonitor({
-            projectPath: params.project_path,
-            enabled: false, // Don't start monitoring, just read
-          });
+          let heartbeatStatus: any = {};
 
-          const recentEntries = await tempHeartbeat.getRecentHeartbeats(lines);
-          const status = tempHeartbeat.getStatus();
+          if (multiPathHeartbeat) {
+            // Multi-path monitoring
+            const allRecentEntries = await multiPathHeartbeat.getAllRecentHeartbeats(lines);
+            const status = multiPathHeartbeat.getStatus();
+            
+            heartbeatStatus = {
+              type: 'multi-path',
+              monitor: status,
+              recent_entries: allRecentEntries,
+              total_paths: status.paths.length
+            };
+          } else if (heartbeatMonitor) {
+            // Single path monitoring
+            const recentEntries = await heartbeatMonitor.getRecentHeartbeats(lines);
+            const status = heartbeatMonitor.getStatus();
+            
+            heartbeatStatus = {
+              type: 'single-path',
+              monitor: status,
+              recent_entries: { [params.project_path]: recentEntries },
+              total_paths: 1
+            };
+          } else {
+            // Create temporary heartbeat monitor to read status
+            const tempHeartbeat = new HeartbeatMonitor({
+              projectPath: params.project_path,
+              enabled: false, // Don't start monitoring, just read
+            });
 
-          const heartbeatStatus = {
-            monitor: heartbeatMonitor
-              ? heartbeatMonitor.getStatus()
-              : { isRunning: false },
-            recent_entries: recentEntries,
-            file_status: status,
-          };
+            const recentEntries = await tempHeartbeat.getRecentHeartbeats(lines);
+            const status = tempHeartbeat.getStatus();
+            
+            heartbeatStatus = {
+              type: 'temporary',
+              monitor: { isRunning: false },
+              recent_entries: { [params.project_path]: recentEntries },
+              file_status: status
+            };
+          }
 
           return {
             content: [
@@ -742,6 +844,47 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           ],
         };
 
+      // Executor Tools
+      case "kritiq":
+        // Para kritiq, não precisamos de project_path, então criamos uma instância local
+        const criticToolsKritiq = new CriticTools(params.working_directory);
+        const kritiqResult = await criticToolsKritiq.kritiqPt(
+          params.command,
+          params.generated_response,
+          params.timeout || 600
+        );
+        return {
+          content: [{ type: "text", text: kritiqResult }],
+        };
+
+      case "evaluate_with_gemini":
+        // Para evaluation, não precisamos de project_path, então criamos uma instância local
+        const criticToolsEval = new CriticTools(params.working_directory);
+        const evalResult = await criticToolsEval.evaluateWithGemini(
+          params.command,
+          params.generated_response,
+          params.timeout || 600
+        );
+        return {
+          content: [{ type: "text", text: evalResult }],
+        };
+
+      case "execute_terminal_command":
+        // Para terminal command, não precisamos de project_path, então criamos uma instância local
+        const criticToolsTerminal = new CriticTools(params.working_directory);
+        if (params.working_directory) {
+          await criticToolsTerminal.setWorkingDirectory(
+            params.working_directory
+          );
+        }
+        const terminalResult = await criticToolsTerminal.executeCommand(
+          params.command,
+          params.timeout
+        );
+        return {
+          content: [{ type: "text", text: terminalResult }],
+        };
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
@@ -860,33 +1003,61 @@ async function main() {
   // Inicializar heartbeat monitor se habilitado
   const heartbeatEnabled = process.env.MCP_HEARTBEAT !== "false";
   if (heartbeatEnabled) {
-    const projectPath = process.env.MEMORY_PROJECT_PATH || process.cwd();
-    const heartbeatInterval = parseInt(
-      process.env.MCP_HEARTBEAT_INTERVAL || "10"
-    );
+    const monitoringPaths = process.env.MCP_MONITORING_PATHS;
+    
+    if (monitoringPaths) {
+      // Multi-path monitoring
+      multiPathHeartbeat = createHeartbeatFromEnv();
 
-    heartbeatMonitor = new HeartbeatMonitor({
-      projectPath,
-      interval: heartbeatInterval,
-      enabled: true,
-    });
+      // Configurar eventos do multi-path heartbeat
+      multiPathHeartbeat.on("started", () => {
+        const status = multiPathHeartbeat!.getStatus();
+        console.error(`Multi-path heartbeat monitor started - monitoring ${status.paths.length} paths`);
+        status.paths.forEach(path => {
+          console.error(`  - ${path}/ia-memory/heartbeat.log`);
+        });
+      });
 
-    // Configurar eventos do heartbeat
-    heartbeatMonitor.on("started", () => {
-      console.error(
-        `Heartbeat monitor started - interval: ${heartbeatInterval}s`
+      multiPathHeartbeat.on("error", (error) => {
+        console.error("Multi-path heartbeat monitor error:", error);
+      });
+
+      // Iniciar monitoring
+      try {
+        await multiPathHeartbeat.start();
+      } catch (error) {
+        console.error("Failed to start multi-path heartbeat monitor:", error);
+      }
+    } else {
+      // Single path monitoring (legacy)
+      const projectPath = process.env.MEMORY_PROJECT_PATH || process.cwd();
+      const heartbeatInterval = parseInt(
+        process.env.MCP_HEARTBEAT_INTERVAL || "10"
       );
-    });
 
-    heartbeatMonitor.on("error", (error) => {
-      console.error("Heartbeat monitor error:", error);
-    });
+      heartbeatMonitor = new HeartbeatMonitor({
+        projectPath,
+        interval: heartbeatInterval,
+        enabled: true,
+      });
 
-    // Iniciar monitoring
-    try {
-      await heartbeatMonitor.start();
-    } catch (error) {
-      console.error("Failed to start heartbeat monitor:", error);
+      // Configurar eventos do heartbeat
+      heartbeatMonitor.on("started", () => {
+        console.error(
+          `Heartbeat monitor started - interval: ${heartbeatInterval}s`
+        );
+      });
+
+      heartbeatMonitor.on("error", (error) => {
+        console.error("Heartbeat monitor error:", error);
+      });
+
+      // Iniciar monitoring
+      try {
+        await heartbeatMonitor.start();
+      } catch (error) {
+        console.error("Failed to start heartbeat monitor:", error);
+      }
     }
   }
 
@@ -903,18 +1074,24 @@ main().catch((error) => {
 });
 
 // Graceful shutdown
-process.on("SIGTERM", async () => {
-  console.error("Received SIGTERM, shutting down gracefully...");
+process.on('SIGTERM', async () => {
+  console.error('Received SIGTERM, shutting down gracefully...');
   if (heartbeatMonitor) {
     await heartbeatMonitor.stop();
+  }
+  if (multiPathHeartbeat) {
+    await multiPathHeartbeat.stop();
   }
   process.exit(0);
 });
 
-process.on("SIGINT", async () => {
-  console.error("Received SIGINT, shutting down gracefully...");
+process.on('SIGINT', async () => {
+  console.error('Received SIGINT, shutting down gracefully...');
   if (heartbeatMonitor) {
     await heartbeatMonitor.stop();
+  }
+  if (multiPathHeartbeat) {
+    await multiPathHeartbeat.stop();
   }
   process.exit(0);
 });

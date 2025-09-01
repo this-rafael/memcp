@@ -24,6 +24,7 @@ Options:
   --no-heartbeat      Disable heartbeat monitoring
   --no-parallel      Disable parallel processing
   --no-background    Disable background tasks
+  --paths <paths>     Comma-separated paths to monitor (e.g., "/path1,/path2")
   --help, -h         Show this help
 
 Examples:
@@ -32,12 +33,14 @@ Examples:
   memcp --heartbeat 5            # Heartbeat every 5 seconds
   memcp /path/to/project         # Start in specific project directory
   memcp --no-heartbeat           # Disable monitoring
+  memcp --paths "/home/user/proj1,/home/user/proj2"  # Monitor multiple paths
 
 Environment Variables:
   MEMORY_PROJECT_PATH    Project path (overrides argument)
   MCP_MAX_WORKERS       Number of workers
   MCP_HEARTBEAT         Enable/disable heartbeat (true/false)
   MCP_HEARTBEAT_INTERVAL Heartbeat interval in seconds
+  MCP_MONITORING_PATHS  Comma-separated paths to monitor
 `);
 }
 
@@ -57,6 +60,7 @@ function main() {
   let enableParallel = true;
   let enableBackground = true;
   let projectPath = process.cwd();
+  let monitoringPaths = [];
 
   // Parse arguments
   for (let i = 0; i < args.length; i++) {
@@ -72,6 +76,9 @@ function main() {
       enableParallel = false;
     } else if (arg === '--no-background') {
       enableBackground = false;
+    } else if (arg === '--paths' && i + 1 < args.length) {
+      const pathsString = args[++i];
+      monitoringPaths = pathsString.split(',').map(p => p.trim()).filter(p => p.length > 0);
     } else if (!arg.startsWith('--')) {
       // Assume it's a project path
       projectPath = arg;
@@ -91,9 +98,21 @@ function main() {
   if (process.env.MCP_HEARTBEAT === 'false') {
     enableHeartbeat = false;
   }
+  if (process.env.MCP_MONITORING_PATHS) {
+    const envPaths = process.env.MCP_MONITORING_PATHS.split(',').map(p => p.trim()).filter(p => p.length > 0);
+    if (envPaths.length > 0) {
+      monitoringPaths = envPaths;
+    }
+  }
+
+  // If no monitoring paths specified, use the main project path
+  if (monitoringPaths.length === 0) {
+    monitoringPaths = [projectPath];
+  }
 
   console.error('Starting MemCP Server...');
   console.error(`Project Path: ${projectPath}`);
+  console.error(`Monitoring Paths: ${monitoringPaths.join(', ')}`);
   console.error(`Workers: ${workers}`);
   console.error(`Heartbeat: ${enableHeartbeat ? heartbeatInterval + 's' : 'disabled'}`);
   console.error(`Parallel: ${enableParallel}`);
@@ -123,7 +142,8 @@ function main() {
     MCP_HEARTBEAT: enableHeartbeat.toString(),
     MCP_HEARTBEAT_INTERVAL: heartbeatInterval.toString(),
     MCP_PARALLEL: enableParallel.toString(),
-    MCP_BACKGROUND_TASKS: enableBackground.toString()
+    MCP_BACKGROUND_TASKS: enableBackground.toString(),
+    MCP_MONITORING_PATHS: monitoringPaths.join(',')
   };
 
   // Spawn the launcher

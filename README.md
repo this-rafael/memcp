@@ -1,16 +1,254 @@
-# Memory MCP Server
+# MemCP - Model Context Protocol Memory Server
 
-Um servidor MCP (Model Context Protocol) avançado para gerenciamento hierárquico e inteligente de memórias, similar ao projeto folderinfo-mcp, mas com funcionalidades expandidas para sistemas de memória empresariais.
+A sophisticated MCP (Model Context Protocol) server implementation that provides advanced memory management capabilities for AI applications with parallel processing, global installation, and multi-path monitoring support.
 
-## 🚀 Características Principais
+## 🚀 Features
 
-- **Sistema de 4 Camadas**: Main Memory (SJSON) → Links (CSV) → Submemories (JSON5) → Memories (Markdown)
-- **Cache Inteligente**: Estratégia write-through com invalidação seletiva
-- **Busca Full-Text**: SQLite FTS5 com ranking BM25 e busca facetada
-- **Validação Robusta**: Sistema Zod com auto-correção e validação de regras de negócio
-- **Navegação Hierárquica**: Árvore de memórias e grafos de relacionamento
-- **Operações CRUD Completas**: Para todas as camadas do sistema
-- **Manutenção Automatizada**: Limpeza, otimização e compactação
+- **Structured Memory Management**: Organize memories by context and subcontext
+- **Full-Text Search**: Advanced search capabilities across all memory content
+- **Link Management**: Create connections between different memory entries
+- **Context-Aware Operations**: Navigate and manage memories within specific contexts
+- **Parallel Processing**: Worker threads and cluster management for high performance
+- **Multi-Path Monitoring**: Monitor multiple project directories simultaneously
+- **Heartbeat Monitoring**: Real-time system health monitoring with configurable intervals
+- **Global Installation**: Available as global command-line tool
+- **Validation System**: Ensure data integrity and consistency
+- **TypeScript Support**: Full type safety and IntelliSense support
+
+## 📦 Installation
+
+### Local Installation
+```bash
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Start with cluster mode (default)
+npm start
+```
+
+### Global Installation
+```bash
+# Install globally
+npm link
+
+# Use anywhere as global command
+memcp --help
+```
+
+## 🏃 Quick Start
+
+### Basic Usage
+```bash
+# Initialize memory system for current directory
+memcp init --project-path $(pwd)
+
+# Start with automatic heartbeat monitoring (10s interval)
+memcp
+
+# Start with custom heartbeat interval
+memcp --heartbeat 5
+
+# Monitor multiple directories
+memcp --paths "/home/user/project1,/home/user/project2"
+```
+
+### Memory Operations
+```bash
+# Create a new memory
+memcp memory create --context "project" --subcontext "tasks" --title "Feature Implementation" --content "Implement user authentication system"
+
+# Search memories
+memcp search --query "authentication"
+
+# Get system statistics
+memcp stats
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+- `MCP_SERVER_PORT`: Server port (default: 3000)
+- `MCP_LOG_LEVEL`: Logging level (debug, info, warn, error)
+- `MCP_PROJECT_PATH`: Default project path for memory operations
+- `MCP_MONITORING_PATHS`: Comma-separated paths for multi-directory monitoring
+- `MCP_HEARTBEAT_INTERVAL`: Heartbeat interval in seconds (default: 10)
+
+### Command Line Options
+```bash
+memcp [options]
+
+Options:
+  --parallel              Enable parallel processing (default: true)
+  --workers <number>      Number of worker threads (default: 4)
+  --heartbeat <seconds>   Heartbeat interval in seconds (default: 10)
+  --paths <paths>         Comma-separated paths to monitor
+  --project-path <path>   Project path for memory operations
+  --help                  Display help information
+```
+
+## 🏗️ Project Structure
+
+```
+src/
+├── index.ts              # Main server implementation with heartbeat integration
+├── types.ts              # TypeScript type definitions
+├── tools/                # MCP tool implementations
+│   ├── parallel-memory.tool.ts  # Parallel processing tools
+│   └── ...               # Other tool implementations
+├── utils/                # Utility functions
+│   ├── background-tasks.ts      # Background task management
+│   ├── heartbeat-monitor.ts     # Single-path heartbeat monitoring
+│   ├── multi-path-heartbeat.ts  # Multi-path heartbeat monitoring
+│   └── file-system.ts          # File system utilities
+├── workers/              # Worker thread implementations
+│   └── search-worker.ts  # Search worker pool
+├── cluster/              # Cluster management
+│   └── cluster-manager.ts       # MCP cluster manager
+├── validation/           # Data validation system
+├── cache/                # Memory caching layer
+└── indexing/             # Search indexing system
+
+bin/
+├── memory-mcp.mjs              # Original MCP server launcher
+├── memory-mcp-parallel.mjs     # Parallel MCP server launcher
+└── memcp-global.mjs            # Global executable entry point
+```
+
+## 🔍 Monitoring System
+
+### Heartbeat Files
+The system creates `ia-memory/heartbeat.log` files in monitored directories with entries like:
+```
+2025-09-01T11:17:08.486Z - STARTED - PID:151868
+2025-09-01T11:17:11.491Z - RUNNING - PID:151868
+2025-09-01T11:17:14.494Z - RUNNING - PID:151868
+2025-09-01T11:17:16.328Z - STOPPED - PID:151868
+```
+
+### Real-time Monitoring
+```bash
+# Monitor single path heartbeat
+tail -f ia-memory/heartbeat.log
+
+# Monitor multiple paths (in separate terminals)
+tail -f /path/to/project1/ia-memory/heartbeat.log
+tail -f /path/to/project2/ia-memory/heartbeat.log
+
+# Check heartbeat status
+memcp heartbeat_status --project-path /path/to/project
+```
+
+## 🔧 API Reference
+
+### Memory Operations
+- `memory_create`: Create a new memory entry
+- `memory_read`: Read memory by path
+- `memory_main_get`: Get main memory or specific section
+- `memory_main_update`: Update main memory section
+- `memory_main_add_context`: Add new context to main memory
+
+### Search Operations
+- `search_memories`: Full-text search across memories
+- `get_memory_tree`: Get memory tree structure
+- `get_filesystem_tree`: Get file system tree
+
+### Link Management
+- `links_create`: Create new link between memories
+- `links_read`: Read links for context/subcontext
+
+### System Operations
+- `init`: Initialize memory system
+- `stats`: Get system statistics
+- `validate_system`: Validate system integrity
+- `heartbeat_status`: Get heartbeat monitor status
+
+### Parallel Processing
+- `parallel_memory_tools`: Access to parallelized memory operations
+- Background task queue management
+- Worker thread pool management
+- Cluster-based processing
+
+## 📊 Performance Features
+
+### Parallel Processing
+- **Worker Threads**: Dedicated workers for search and indexing operations
+- **Cluster Management**: Multiple server instances for load balancing
+- **Background Tasks**: Non-blocking operations for system maintenance
+- **Connection Pooling**: Efficient resource management
+
+### Monitoring & Health
+- **Heartbeat System**: Real-time health monitoring across multiple directories
+- **Process Management**: Automatic PID tracking and lifecycle management
+- **System Statistics**: Performance metrics and usage analytics
+- **Validation Checks**: Continuous integrity monitoring
+
+## 🎯 Usage Examples
+
+### Single Project Monitoring
+```bash
+# Start in current directory with default settings
+memcp
+
+# Custom heartbeat interval
+memcp --heartbeat 3
+```
+
+### Multi-Project Monitoring
+```bash
+# Monitor multiple projects
+memcp --paths "/home/user/project1,/home/user/project2,/home/user/project3"
+
+# Via environment variable
+export MCP_MONITORING_PATHS="/path1,/path2"
+memcp
+```
+
+### Development Workflow
+```bash
+# Initialize new project
+cd /path/to/new/project
+memcp init
+
+# Start monitoring with faster heartbeat for development
+memcp --heartbeat 2
+
+# Check system health
+memcp stats
+memcp heartbeat_status
+```
+
+## 🧪 Testing
+
+```bash
+# Run integration tests
+npm test
+
+# Test heartbeat functionality
+node test-heartbeat.mjs
+
+# Test multi-path monitoring
+MCP_MONITORING_PATHS="/path1,/path2" node test-multi-path-heartbeat.mjs
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🔗 Related
+
+- [Model Context Protocol](https://modelcontextprotocol.io/) - Official MCP specification
+- [Claude MCP Integration](https://docs.anthropic.com/en/docs/build-with-claude/model-context-protocol) - Anthropic's MCP documentation
 
 ## 📁 Estrutura do Sistema
 
