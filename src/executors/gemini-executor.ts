@@ -170,7 +170,9 @@ ${generatedResponse}
       const result = await this.terminal.execute(geminiCommand, timeout);
       return result.replace(/Loaded cached credentials\./g, "").trim();
     } finally {
-      try { await fs.promises.unlink(filePath); } catch {}
+      try {
+        await fs.promises.unlink(filePath);
+      } catch {}
     }
   }
 

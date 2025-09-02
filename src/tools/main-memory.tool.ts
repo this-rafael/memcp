@@ -88,10 +88,7 @@ export class MainMemoryTools {
     await this.cache.updateMainMemory("contexts", updatedContexts);
 
     // Create empty CSV file for the context
-    await FileSystemUtils.writeCSV(
-      `${this.memoryPath}/links/${name}.csv`,
-      []
-    );
+    await FileSystemUtils.writeCSV(`${this.memoryPath}/links/${name}.csv`, []);
 
     return true;
   }

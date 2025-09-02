@@ -1,4 +1,3 @@
-import * as fs from "fs/promises";
 import * as path from "path";
 import { MemoryCache } from "../cache/memory-cache.js";
 import { SearchIndex } from "../indexing/search-index.js";

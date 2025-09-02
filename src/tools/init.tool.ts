@@ -28,11 +28,12 @@ export async function init(params: InitParams): Promise<{
 
       // Create initial main memory
       const projectBase = path.basename(project_path);
-      
+
       // Check if we should create default contexts (skip in test environments)
-      const createDefaults = process.env.NODE_ENV !== 'test' && 
-                           process.env.SKIP_DEFAULT_CONTEXTS !== 'true';
-      
+      const createDefaults =
+        process.env.NODE_ENV !== "test" &&
+        process.env.SKIP_DEFAULT_CONTEXTS !== "true";
+
       const initialMemory: MainMemory = {
         project_name: projectBase,
         // Add alias 'project' for backward/test compatibility
@@ -53,23 +54,25 @@ export async function init(params: InitParams): Promise<{
           auto_organize: false,
           backup_enabled: false,
         },
-        contexts: createDefaults ? {
-          general: {
-            description: "General project information and notes",
-            link_file: "general.csv",
-            priority: 1,
-          },
-          architecture: {
-            description: "Architectural decisions and system design",
-            link_file: "architecture.csv",
-            priority: 2,
-          },
-          decisions: {
-            description: "Important project decisions and rationale",
-            link_file: "decisions.csv",
-            priority: 3,
-          },
-        } : {},
+        contexts: createDefaults
+          ? {
+              general: {
+                description: "General project information and notes",
+                link_file: "general.csv",
+                priority: 1,
+              },
+              architecture: {
+                description: "Architectural decisions and system design",
+                link_file: "architecture.csv",
+                priority: 2,
+              },
+              decisions: {
+                description: "Important project decisions and rationale",
+                link_file: "decisions.csv",
+                priority: 3,
+              },
+            }
+          : {},
         metadata: {
           total_memories: 0,
           total_submemories: 0,

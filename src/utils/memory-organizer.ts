@@ -81,7 +81,7 @@ export class MemoryOrganizer {
     this.projectPath = projectPath;
     this.gemini = GeminiExecutor.create();
     this.logger = new MemoryOrganizerLogger(projectPath);
-  this.geminiTimeout = parseInt(process.env.GEMINI_TIMEOUT || "90");
+    this.geminiTimeout = parseInt(process.env.GEMINI_TIMEOUT || "90");
 
     // Initialize tool instances with memory path
     const memoryPath = path.join(projectPath, "ia-memory");
