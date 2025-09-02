@@ -68,6 +68,7 @@ export class MemoryOrganizer {
   private intervalId: NodeJS.Timeout | null = null;
   private isRunning = false;
   private logger: MemoryOrganizerLogger;
+  private geminiTimeout: number;
 
   // Tool instances
   private mainMemory: MainMemoryTools;
@@ -80,6 +81,7 @@ export class MemoryOrganizer {
     this.projectPath = projectPath;
     this.gemini = GeminiExecutor.create();
     this.logger = new MemoryOrganizerLogger(projectPath);
+  this.geminiTimeout = parseInt(process.env.GEMINI_TIMEOUT || "90");
 
     // Initialize tool instances with memory path
     const memoryPath = path.join(projectPath, "ia-memory");
@@ -283,117 +285,70 @@ export class MemoryOrganizer {
     memoryAnalysis: any,
     availableFunctions: string[]
   ): Promise<any> {
-    const prompt = `
-🤖 **MEMORY ORGANIZER AGENT - YOLO MODE** 🤖
+    // Prepare a compact snapshot to avoid huge prompts
+    const contexts = memoryAnalysis?.mainMemory?.contexts
+      ? Object.keys(memoryAnalysis.mainMemory.contexts)
+      : [];
+    const stats = memoryAnalysis?.stats || {};
+    const linkCount = memoryAnalysis?.links?.length || 0;
 
-Você é um agente especializado em organização inteligente de sistemas de memória MCP. Sua missão é analisar a estrutura atual e propor melhorias automáticas para otimizar a organização, criar links úteis e melhorar a usabilidade.
+    // Detect potential dangling links (those whose files are missing)
+    const danglingLinks: string[] = [];
+    try {
+      const fsPromises = (await import("fs")).promises;
+      for (const link of memoryAnalysis.links || []) {
+        try {
+          await fsPromises.access(
+            path.join(this.projectPath, "ia-memory", link.caminho_memoria)
+          );
+        } catch {
+          danglingLinks.push(
+            `${link.contexto}/${link.subcontexto} -> ${link.caminho_memoria}`
+          );
+        }
+      }
+    } catch {}
 
-## 📊 ANÁLISE ATUAL DA MEMÓRIA
+    const snapshot = {
+      contexts,
+      stats,
+      linkCount,
+      danglingLinks: danglingLinks.slice(0, 15), // cap
+    };
 
-\`\`\`json
-${JSON.stringify(memoryAnalysis, null, 2)}
-\`\`\`
+    const prompt = `Você é um agente de organização de memórias. Gere no MÁXIMO 5 recomendações concisas para consolidar, corrigir links quebrados e remover redundâncias.
+RETORNE SOMENTE JSON válido.
 
-## 🛠️ FUNÇÕES DISPONÍVEIS
+SNAPSHOT:
+${JSON.stringify(snapshot)}
 
-${availableFunctions.map((func) => `- ${func}`).join("\n")}
-
-## 🎯 OBJETIVOS DE ORGANIZAÇÃO
-
-1. **Criar Links Inteligentes**: Identificar memórias relacionadas e criar conexões lógicas
-2. **Otimizar Estrutura de Contextos**: Reorganizar contextos para melhor navegação
-3. **Melhorar Submemórias**: Agrupar informações relacionadas em submemórias coerentes
-4. **Limpar Redundâncias**: Identificar e consolidar informações duplicadas
-5. **Estabelecer Hierarquias**: Criar estruturas hierárquicas lógicas
-
-## 📋 FORMATO DE RESPOSTA
-
-Responda APENAS com um JSON válido seguindo este formato:
-
-\`\`\`json
+FORMAT JSON:
 {
-  "analysis": {
-    "currentState": "Breve descrição do estado atual",
-    "issues": ["Problema 1", "Problema 2"],
-    "opportunities": ["Oportunidade 1", "Oportunidade 2"]
-  },
+  "analysis": {"currentState": string, "issues": string[], "opportunities": string[]},
   "recommendations": [
-    {
-      "type": "create_link",
-      "priority": "high|medium|low", 
-      "description": "Descrição da ação",
-      "action": {
-        "function": "links_create",
-        "params": {
-          "context": "nome_contexto",
-          "subcontext": "nome_subcontexto", 
-          "description": "Descrição do link",
-          "memory_path": "caminho/para/memoria"
-        }
-      }
-    },
-    {
-      "type": "create_context",
-      "priority": "high|medium|low",
-      "description": "Descrição da ação", 
-      "action": {
-        "function": "memory_main_add_context",
-        "params": {
-          "name": "novo_contexto",
-          "description": "Descrição do contexto",
-          "priority": 5
-        }
-      }
-    },
-    {
-      "type": "create_memory",
-      "priority": "high|medium|low",
-      "description": "Descrição da ação",
-      "action": {
-        "function": "memory_create", 
-        "params": {
-          "context": "contexto",
-          "subcontext": "subcontexto",
-          "title": "Título da memória",
-          "content": "Conteúdo organizacional",
-          "importance": "medium",
-          "tags": ["organização", "automático"]
-        }
-      }
-    }
+    {"type": "create_memory|create_context|create_link|cleanup_link|consolidate", "priority": "high|medium|low", "description": string, "action": {"function": string, "params": object}}
   ]
 }
-\`\`\`
 
-## ⚡ MODO YOLO ATIVADO
-
-- Seja PROATIVO: Sugira melhorias mesmo sem solicitação explícita
-- Seja INTELIGENTE: Use padrões e heurísticas para identificar oportunidades
-- Seja ÚTIL: Foque em ações que realmente melhorem a organização
-- Limite-se a 5-8 recomendações por execução para não sobrecarregar
-
-Analise e organize! 🚀
-    `;
+Regras:
+- Se houver danglingLinks, inclua ações cleanup_link usando links_delete.
+- Para muitos contexts com poucos memories, sugira consolidate criando contexto 'consolidation'.
+- Evite textos longos (>200 chars).`;
 
     try {
-      const response = await this.gemini.execute(
-        "Analise a estrutura de memória e gere recomendações de organização",
+      const response = await this.gemini.executeDirectPrompt(
         prompt,
-        240 // 2 minutes timeout for comprehensive analysis
+        parseInt(process.env.GEMINI_TIMEOUT || "90")
       );
 
-      // Extract JSON from response
-      const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
+      // Attempt to extract JSON (first {...})
+      const jsonMatch = response.match(/\{[\s\S]*\}$/m);
       if (jsonMatch) {
-        return JSON.parse(jsonMatch[1]);
+        return JSON.parse(jsonMatch[0]);
       }
-
-      // Try to parse the entire response as JSON
       return JSON.parse(response);
     } catch (error) {
       await this.logger.error(`Error generating recommendations: ${error}`);
-
-      // Fallback: create simple recommendations based on analysis
       return await this.createFallbackRecommendations(memoryAnalysis);
     }
   }
@@ -441,11 +396,19 @@ Analise e organize! 🚀
           // Check if consolidation context already exists
           try {
             const mainMemory = await this.mainMemory.memoryMainGet();
-            const contextExists =
-              mainMemory.contexts &&
-              mainMemory.contexts.find(
-                (ctx: any) => ctx.name === "consolidation"
-              );
+            let contextExists = false;
+            if (mainMemory.contexts) {
+              if (Array.isArray(mainMemory.contexts)) {
+                contextExists = mainMemory.contexts.some(
+                  (ctx: any) => ctx.name === "consolidation"
+                );
+              } else if (typeof mainMemory.contexts === "object") {
+                contextExists = Object.prototype.hasOwnProperty.call(
+                  mainMemory.contexts,
+                  "consolidation"
+                );
+              }
+            }
 
             if (!contextExists) {
               recommendations.push({
@@ -536,10 +499,20 @@ Analise e organize! 🚀
             try {
               // Check if context already exists
               const mainMemory = await this.mainMemory.memoryMainGet();
-              if (
-                mainMemory.contexts &&
-                mainMemory.contexts.find((ctx: any) => ctx.name === params.name)
-              ) {
+              let exists = false;
+              if (mainMemory.contexts) {
+                if (Array.isArray(mainMemory.contexts)) {
+                  exists = mainMemory.contexts.some(
+                    (ctx: any) => ctx.name === params.name
+                  );
+                } else if (typeof mainMemory.contexts === "object") {
+                  exists = Object.prototype.hasOwnProperty.call(
+                    mainMemory.contexts,
+                    params.name
+                  );
+                }
+              }
+              if (exists) {
                 await this.logger.info(
                   `Context '${params.name}' already exists, skipping`
                 );

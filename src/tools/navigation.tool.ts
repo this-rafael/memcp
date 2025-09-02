@@ -49,7 +49,7 @@ export class NavigationTools {
 
       // Build full tree
       const rootNode: MemoryTreeNode = {
-        name: mainMemory.project_name,
+        name: "Memory System",
         type: "context",
         children: [],
         count: 0,

@@ -154,6 +154,27 @@ ${generatedResponse}
   }
 
   /**
+   * Execute a raw prompt (no evaluation wrapper). Designed for agents that need direct JSON back.
+   * Uses a temporary file to avoid shell length limits with big prompts.
+   */
+  async executeDirectPrompt(prompt: string, timeout = 120): Promise<string> {
+    const fs = await import("fs");
+    const os = await import("os");
+    const path = await import("path");
+    const tmpDir = os.tmpdir();
+    const filePath = path.join(tmpDir, `gemini-prompt-${Date.now()}.txt`);
+    await fs.promises.writeFile(filePath, prompt, "utf8");
+    try {
+      // -y para resposta direta sem confirmação, redirecionando stdin
+      const geminiCommand = `gemini -y < ${shellEscape(filePath)}`;
+      const result = await this.terminal.execute(geminiCommand, timeout);
+      return result.replace(/Loaded cached credentials\./g, "").trim();
+    } finally {
+      try { await fs.promises.unlink(filePath); } catch {}
+    }
+  }
+
+  /**
    * Execute kritiq evaluation (critical analysis)
    */
   async executeKritiq(

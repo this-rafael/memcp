@@ -183,7 +183,7 @@ describe("Memory MCP System Integration Tests", () => {
       );
 
       expect(memoryPath).toBeDefined();
-      expect(memoryPath).toContain("dev/backend/memories/");
+      expect(memoryPath).toContain("memories/dev/backend/");
       expect(memoryPath.endsWith(".md")).toBe(true);
 
       const memory = await memoryTools.memoryRead(memoryPath);

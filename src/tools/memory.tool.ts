@@ -91,51 +91,11 @@ export class MemoryTools {
       const fullPath = path.join(this.memoryPath, relativePath);
       return await FileSystemUtils.readMarkdown(fullPath);
     } catch (error) {
-      const fullPath = path.join(this.memoryPath, relativePath);
-
-      // Try to provide helpful debugging information
-      let debugInfo = "";
-      try {
-        const dirPath = path.dirname(fullPath);
-        const fileName = path.basename(fullPath);
-        const files = await fs.readdir(dirPath);
-        const similarFiles = files.filter((f: string) =>
-          f.includes(fileName.split("-").slice(-2).join("-").replace(".md", ""))
-        );
-
-        if (similarFiles.length > 0) {
-          debugInfo = ` Similar files found: [${similarFiles.join(", ")}]`;
-        } else {
-          debugInfo = ` Directory contains: [${files.slice(0, 5).join(", ")}${
-            files.length > 5 ? "..." : ""
-          }]`;
-        }
-      } catch (listError) {
-        // Ignore listing errors
-      }
-      // Instead of simplesmente falhar, coletar todas as memórias disponíveis para ajudar o usuário
-      const availableMemories = await this.listAllMemories();
-      const errorMessage = `Failed to read memory: ${
-        error instanceof Error ? error.message : String(error)
-      } (Full path: ${fullPath})${debugInfo}`;
-      // Retornar objeto estruturado dentro de Memory.content para não quebrar contrato existente
-      return {
-        frontmatter: {
-          id: "error",
-          title: "Memory read failed",
-          context: "system",
-          subcontext: "diagnostics",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          tags: ["error", "diagnostics"],
-          importance: "low",
-        },
-        content: [
-          errorMessage,
-          "\n\nAvailable memories (relative paths):",
-          ...availableMemories.slice(0, 200), // limitar para evitar resposta gigante
-        ].join("\n"),
-      };
+      throw new Error(
+        `Failed to read memory: ${
+          error instanceof Error ? error.message : String(error)
+        } (Full path: ${path.join(this.memoryPath, relativePath)})`
+      );
     }
   }
 

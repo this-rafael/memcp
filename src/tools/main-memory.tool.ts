@@ -54,43 +54,46 @@ export class MainMemoryTools {
     description: string,
     priority: number
   ): Promise<boolean> {
-    try {
-      if (!this.cache.isReady()) {
-        await this.cache.loadAll();
-      }
-
-      const mainMemory = this.cache.getMainMemory() as MainMemory;
-
-      // Check if context already exists
-      if (mainMemory.contexts[name]) {
-        throw new Error(`Context '${name}' already exists`);
-      }
-
-      const newContext: Context = {
-        description,
-        link_file: `${name}.csv`,
-        priority,
-      };
-
-      // Update contexts
-      const updatedContexts = {
-        ...mainMemory.contexts,
-        [name]: newContext,
-      };
-
-      await this.cache.updateMainMemory("contexts", updatedContexts);
-
-      // Create empty CSV file for the context
-      await FileSystemUtils.writeCSV(
-        `${this.memoryPath}/links/${name}.csv`,
-        []
-      );
-
-      return true;
-    } catch (error) {
-      console.error(`Failed to add context ${name}:`, error);
-      return false;
+    if (!this.cache.isReady()) {
+      await this.cache.loadAll();
     }
+
+    // Basic validation
+    if (!name || !name.trim()) {
+      throw new Error("Context name cannot be empty");
+    }
+    if (name.includes("/")) {
+      throw new Error("Context name cannot contain '/'");
+    }
+
+    const mainMemory = this.cache.getMainMemory() as MainMemory;
+
+    // Check if context already exists
+    if (mainMemory.contexts[name]) {
+      throw new Error(`Context '${name}' already exists`);
+    }
+
+    const newContext: Context = {
+      description,
+      link_file: `${name}.csv`,
+      priority,
+    };
+
+    // Update contexts
+    const updatedContexts = {
+      ...mainMemory.contexts,
+      [name]: newContext,
+    };
+
+    await this.cache.updateMainMemory("contexts", updatedContexts);
+
+    // Create empty CSV file for the context
+    await FileSystemUtils.writeCSV(
+      `${this.memoryPath}/links/${name}.csv`,
+      []
+    );
+
+    return true;
   }
 
   /**
