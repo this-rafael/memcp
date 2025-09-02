@@ -379,7 +379,7 @@ Analise e organize! 🚀
       const response = await this.gemini.execute(
         "Analise a estrutura de memória e gere recomendações de organização",
         prompt,
-        120 // 2 minutes timeout for comprehensive analysis
+        240 // 2 minutes timeout for comprehensive analysis
       );
 
       // Extract JSON from response
@@ -441,9 +441,12 @@ Analise e organize! 🚀
           // Check if consolidation context already exists
           try {
             const mainMemory = await this.mainMemory.memoryMainGet();
-            const contextExists = mainMemory.contexts && 
-              mainMemory.contexts.find((ctx: any) => ctx.name === "consolidation");
-            
+            const contextExists =
+              mainMemory.contexts &&
+              mainMemory.contexts.find(
+                (ctx: any) => ctx.name === "consolidation"
+              );
+
             if (!contextExists) {
               recommendations.push({
                 type: "create_context",
@@ -463,7 +466,9 @@ Analise e organize! 🚀
             }
           } catch (error) {
             // If we can't check, skip this recommendation to be safe
-            await this.logger.warn(`Could not check existing contexts: ${error}`);
+            await this.logger.warn(
+              `Could not check existing contexts: ${error}`
+            );
           }
         }
       }
@@ -531,18 +536,25 @@ Analise e organize! 🚀
             try {
               // Check if context already exists
               const mainMemory = await this.mainMemory.memoryMainGet();
-              if (mainMemory.contexts && mainMemory.contexts.find((ctx: any) => ctx.name === params.name)) {
-                await this.logger.info(`Context '${params.name}' already exists, skipping`);
+              if (
+                mainMemory.contexts &&
+                mainMemory.contexts.find((ctx: any) => ctx.name === params.name)
+              ) {
+                await this.logger.info(
+                  `Context '${params.name}' already exists, skipping`
+                );
                 break;
               }
-              
+
               await this.mainMemory.memoryMainAddContext(
                 params.name,
                 params.description,
                 params.priority
               );
             } catch (error) {
-              await this.logger.error(`Failed to add context ${params.name}: ${error}`);
+              await this.logger.error(
+                `Failed to add context ${params.name}: ${error}`
+              );
             }
             break;
 
@@ -557,7 +569,9 @@ Analise e organize! 🚀
                 params.tags
               );
             } catch (error) {
-              await this.logger.error(`Failed to create memory '${params.title}': ${error}`);
+              await this.logger.error(
+                `Failed to create memory '${params.title}': ${error}`
+              );
             }
             break;
 
