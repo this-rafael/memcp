@@ -1,6 +1,6 @@
 {
   "name": "memcp",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "type": "module",
   "description": "MCP Server for hierarchical intelligent memory system with persistent, indexed and cached context",
   "main": "dist/index.js",
