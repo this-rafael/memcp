@@ -369,54 +369,6 @@ const TOOLS = [
 
   // Executor Tools
   {
-    name: "kritiq",
-    description:
-      "Executa uma avaliação crítica de um artefato com base em um texto de solicitação e uma resposta gerada.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        command: {
-          type: "string",
-          description: "Texto de solicitação original",
-        },
-        generated_response: {
-          type: "string",
-          description: "Artefato ou resposta gerada a ser avaliada",
-        },
-        timeout: {
-          type: "integer",
-          description: "Timeout em segundos (padrão: 600)",
-          default: 600,
-        },
-      },
-      required: ["command", "generated_response"],
-    },
-  },
-  {
-    name: "evaluate_with_gemini",
-    description:
-      "Avalia se um comando foi atendido por uma resposta gerada usando Gemini.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        command: {
-          type: "string",
-          description: "O comando original que foi solicitado",
-        },
-        generated_response: {
-          type: "string",
-          description: "A resposta gerada que deve ser avaliada",
-        },
-        timeout: {
-          type: "integer",
-          description: "Timeout em segundos (padrão: 600)",
-          default: 600,
-        },
-      },
-      required: ["command", "generated_response"],
-    },
-  },
-  {
     name: "execute_terminal_command",
     description: "Executa um comando no terminal e retorna o resultado.",
     inputSchema: {
@@ -695,7 +647,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "help":
         const helpContent = {
           memcp_version: getPackageVersion(),
-          total_tools: 14,
+          total_tools: 16,
           total_resources: 3,
           tools: [
             {
@@ -869,30 +821,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
 
       // Executor Tools
-      case "kritiq":
-        // Para kritiq, não precisamos de project_path, então criamos uma instância local
-        const criticToolsKritiq = new CriticTools(params.working_directory);
-        const kritiqResult = await criticToolsKritiq.kritiqPt(
-          params.command,
-          params.generated_response,
-          params.timeout || 600
-        );
-        return {
-          content: [{ type: "text", text: kritiqResult }],
-        };
-
-      case "evaluate_with_gemini":
-        // Para evaluation, não precisamos de project_path, então criamos uma instância local
-        const criticToolsEval = new CriticTools(params.working_directory);
-        const evalResult = await criticToolsEval.evaluateWithGemini(
-          params.command,
-          params.generated_response,
-          params.timeout || 600
-        );
-        return {
-          content: [{ type: "text", text: evalResult }],
-        };
-
       case "execute_terminal_command":
         // Para terminal command, não precisamos de project_path, então criamos uma instância local
         const criticToolsTerminal = new CriticTools(params.working_directory);
