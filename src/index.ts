@@ -6,6 +6,9 @@ import {
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import path from "path";
 
 // Import tools
 import { CriticTools } from "./tools/critic.tool.js";
@@ -25,8 +28,21 @@ import {
 
 import { ToolParams } from "./types.js";
 
+// Get package version dynamically
+function getPackageVersion(): string {
+  try {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const packageJsonPath = path.join(__dirname, "../package.json");
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
+    return packageJson.version;
+  } catch (error) {
+    console.warn("Could not read package version, falling back to 1.0.0");
+    return "1.0.0";
+  }
+}
+
 const server = new Server(
-  { name: "memory-mcp", version: "1.0.0" },
+  { name: "memory-mcp", version: getPackageVersion() },
   { capabilities: { tools: {}, resources: {} } }
 );
 
@@ -678,7 +694,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "help":
         const helpContent = {
-          memcp_version: "1.0.8",
+          memcp_version: getPackageVersion(),
           total_tools: 14,
           total_resources: 3,
           tools: [
@@ -1071,7 +1087,7 @@ async function main() {
     }
   }
 
-  console.error("Memory MCP server running on stdio");
+  console.error(`Memory MCP server v${getPackageVersion()} running on stdio`);
   console.error(`Process ID: ${process.pid}`);
   console.error(
     `Heartbeat monitoring: ${heartbeatEnabled ? "ENABLED" : "DISABLED"}`
