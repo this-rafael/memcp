@@ -7,8 +7,8 @@ import {
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { readFileSync } from "fs";
-import { fileURLToPath } from "url";
 import path from "path";
+import { fileURLToPath } from "url";
 
 // Import tools
 import { CriticTools } from "./tools/critic.tool.js";
