@@ -571,9 +571,7 @@ Regras:
                 }
               }
             } catch (error) {
-              await this.logger.error(
-                `Failed to delete contexts: ${error}`
-              );
+              await this.logger.error(`Failed to delete contexts: ${error}`);
             }
             break;
 
@@ -592,9 +590,7 @@ Regras:
                 }
               }
             } catch (error) {
-              await this.logger.error(
-                `Failed to move memories: ${error}`
-              );
+              await this.logger.error(`Failed to move memories: ${error}`);
             }
             break;
 
@@ -651,7 +647,7 @@ Regras:
               let movedCount = 0;
               for (const result of memories.results || []) {
                 const memory = await this.memory.memoryRead(result.path);
-                
+
                 // Simple heuristic-based analysis
                 const shouldMove = this.shouldMoveMemory(
                   memory,
@@ -720,9 +716,10 @@ Regras:
           title.includes("pattern") ||
           content.includes("architecture") ||
           content.includes("design pattern") ||
-          tags.some((tag: string) => 
-            tag.toLowerCase().includes("architecture") ||
-            tag.toLowerCase().includes("design")
+          tags.some(
+            (tag: string) =>
+              tag.toLowerCase().includes("architecture") ||
+              tag.toLowerCase().includes("design")
           )
         );
 
@@ -733,9 +730,10 @@ Regras:
           title.includes("service") ||
           content.includes("module") ||
           content.includes("component") ||
-          tags.some((tag: string) => 
-            tag.toLowerCase().includes("module") ||
-            tag.toLowerCase().includes("component")
+          tags.some(
+            (tag: string) =>
+              tag.toLowerCase().includes("module") ||
+              tag.toLowerCase().includes("component")
           )
         );
 
@@ -746,9 +744,10 @@ Regras:
           title.includes("story") ||
           content.includes("task analysis") ||
           content.includes("user story") ||
-          tags.some((tag: string) => 
-            tag.toLowerCase().includes("task") ||
-            tag.toLowerCase().includes("analysis")
+          tags.some(
+            (tag: string) =>
+              tag.toLowerCase().includes("task") ||
+              tag.toLowerCase().includes("analysis")
           )
         );
 
