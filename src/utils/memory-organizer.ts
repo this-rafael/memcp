@@ -266,6 +266,12 @@ export class MemoryOrganizer {
       "submemory_update - Update submemory content",
       "submemory_delete - Delete submemory",
 
+      // Context Management Tools
+      "contexts_delete - Delete multiple empty contexts",
+      "context_rename - Rename a context",
+      "memories_move - Move memories between contexts",
+      "memories_analyze_and_move - Analyze and move memories based on content",
+
       // Navigation Tools
       "get_memory_tree - Get memory tree structure",
       "get_filesystem_tree - Get file system tree",
@@ -556,6 +562,123 @@ Regras:
             );
             break;
 
+          case "contexts_delete":
+            try {
+              if (params.contexts && Array.isArray(params.contexts)) {
+                for (const contextName of params.contexts) {
+                  await this.mainMemory.memoryMainRemoveContext(contextName);
+                  await this.logger.info(`Deleted context: ${contextName}`);
+                }
+              }
+            } catch (error) {
+              await this.logger.error(
+                `Failed to delete contexts: ${error}`
+              );
+            }
+            break;
+
+          case "memories_move":
+            try {
+              if (params.memories && Array.isArray(params.memories)) {
+                for (const memoryMove of params.memories) {
+                  await this.memory.memoryMove(
+                    memoryMove.from_path,
+                    memoryMove.to_context,
+                    memoryMove.to_subcontext
+                  );
+                  await this.logger.info(
+                    `Moved memory from ${memoryMove.from_path} to ${memoryMove.to_context}/${memoryMove.to_subcontext}`
+                  );
+                }
+              }
+            } catch (error) {
+              await this.logger.error(
+                `Failed to move memories: ${error}`
+              );
+            }
+            break;
+
+          case "context_rename":
+            try {
+              // First create new context
+              await this.mainMemory.memoryMainAddContext(
+                params.new_name,
+                params.description || `Renamed from ${params.old_name}`,
+                params.priority || 5
+              );
+
+              // Get all memories from old context
+              const memories = await this.memory.searchMemories(
+                `context:${params.old_name}`,
+                { contexts: [params.old_name] }
+              );
+
+              // Move all memories to new context
+              for (const result of memories.results || []) {
+                const oldPath = result.path;
+                const memory = await this.memory.memoryRead(oldPath);
+                await this.memory.memoryMove(
+                  oldPath,
+                  params.new_name,
+                  memory.frontmatter.subcontext
+                );
+              }
+
+              // Remove old context
+              await this.mainMemory.memoryMainRemoveContext(params.old_name);
+              await this.logger.info(
+                `Renamed context from ${params.old_name} to ${params.new_name}`
+              );
+            } catch (error) {
+              await this.logger.error(
+                `Failed to rename context ${params.old_name} to ${params.new_name}: ${error}`
+              );
+            }
+            break;
+
+          case "memories_analyze_and_move":
+            try {
+              const sourceContext = params.source_context;
+              const targetContext = params.target_context;
+              const criteria = params.criteria || "general classification";
+
+              // Get memories from source context
+              const memories = await this.memory.searchMemories(
+                `context:${sourceContext}`,
+                { contexts: [sourceContext] }
+              );
+
+              let movedCount = 0;
+              for (const result of memories.results || []) {
+                const memory = await this.memory.memoryRead(result.path);
+                
+                // Simple heuristic-based analysis
+                const shouldMove = this.shouldMoveMemory(
+                  memory,
+                  targetContext,
+                  criteria
+                );
+
+                if (shouldMove) {
+                  await this.memory.memoryMove(
+                    result.path,
+                    targetContext,
+                    memory.frontmatter.subcontext
+                  );
+                  movedCount++;
+                }
+              }
+
+              await this.logger.info(
+                `Analyzed and moved ${movedCount} memories from ${sourceContext} to ${targetContext}`
+              );
+            } catch (error) {
+              await this.logger.error(
+                `Failed to analyze and move memories: ${error}`
+              );
+            }
+            break;
+
           default:
             await this.logger.warn(`🤖 Unknown function: ${action.function}`);
         }
@@ -574,6 +697,73 @@ Regras:
    */
   getProjectPath(): string {
     return this.projectPath;
+  }
+
+  /**
+   * Simple heuristic to determine if a memory should be moved to a different context
+   */
+  private shouldMoveMemory(
+    memory: any,
+    targetContext: string,
+    criteria: string
+  ): boolean {
+    const title = memory.frontmatter.title?.toLowerCase() || "";
+    const content = memory.content?.toLowerCase() || "";
+    const tags = memory.frontmatter.tags || [];
+
+    // Simple keyword-based heuristics
+    switch (targetContext) {
+      case "architecture":
+        return (
+          title.includes("architecture") ||
+          title.includes("design") ||
+          title.includes("pattern") ||
+          content.includes("architecture") ||
+          content.includes("design pattern") ||
+          tags.some((tag: string) => 
+            tag.toLowerCase().includes("architecture") ||
+            tag.toLowerCase().includes("design")
+          )
+        );
+
+      case "modules":
+        return (
+          title.includes("module") ||
+          title.includes("component") ||
+          title.includes("service") ||
+          content.includes("module") ||
+          content.includes("component") ||
+          tags.some((tag: string) => 
+            tag.toLowerCase().includes("module") ||
+            tag.toLowerCase().includes("component")
+          )
+        );
+
+      case "task-analysis":
+        return (
+          title.includes("task") ||
+          title.includes("analysis") ||
+          title.includes("story") ||
+          content.includes("task analysis") ||
+          content.includes("user story") ||
+          tags.some((tag: string) => 
+            tag.toLowerCase().includes("task") ||
+            tag.toLowerCase().includes("analysis")
+          )
+        );
+
+      case "general":
+        // Move to general if it doesn't fit specific categories
+        return (
+          !title.includes("architecture") &&
+          !title.includes("module") &&
+          !title.includes("task") &&
+          !title.includes("specific")
+        );
+
+      default:
+        return false;
+    }
   }
 }
 
